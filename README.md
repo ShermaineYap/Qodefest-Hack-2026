@@ -270,16 +270,67 @@ cd Qodefest-Hack-2026
 node --version    # Node 22+
 ```
 
-There is no runnable build in this repository yet. Once the extension scaffold lands, the intended flow is:
+The extension builds with Node 22.6+. The Python gateway/enclave run instructions and the current
+tunnel host live in [`server/README.md`](server/README.md). Do not commit build output, `.env` files
+or the team server key.
 
-```bash
-cd extension
-npm install
-npm run build
-# chrome://extensions → Developer mode → Load unpacked → extension/dist
-```
+---
 
-Until then, the README and the roadmap are the source of truth. Do not commit build output, `.env` files or the team server key.
+## Demo runbook
+
+Verified against `main` on 2026-11-19. For the presenting laptop.
+
+### Setup (10 minutes)
+
+1. Build the extension:
+
+   ```bash
+   cd extension
+   npm install
+   npm run build
+   ```
+
+2. Use a fresh Chrome profile, so no other extensions or personal tabs show. Open
+   `chrome://extensions`, turn on Developer mode, **Load unpacked** → `extension/dist`, and pin the
+   Lantern icon.
+3. Check the gateway: `curl <API_BASE>/health` returns `{"status":"ok"}`. `API_BASE` lives in
+   `extension/src/config.ts`. The Cloudflare quick-tunnel host changes whenever it restarts — refresh
+   it from [`server/README.md`](server/README.md) ("Deployment"), update `config.ts`, rebuild.
+4. Optional sanity checks: `npm test` at the repo root (21 tests), `cd extension && npm test` (25),
+   and the enclave's `pytest` (11, see `server/README.md`).
+
+There is no `npm run sim` in this repository yet; use the fallbacks below.
+
+### The demo (~2 minutes)
+
+**Browsing.** Type `maybank2u-secure-login.xyz/login` into the address bar. The warning page appears
+instead of the fake site: on-device brand rules floor the link at 85, so the verdict is HIGH even
+when the gateway alone would score it lower. Press **Go back to safety**, then open a normal site to
+show nothing gets in the way. The gateway must answer for the warning to appear; if it does not, the
+extension shows NOT CHECKED instead of warning (fail closed).
+
+**The side panel.** Click the Lantern icon and paste a whole scam SMS. The panel shows the verdict,
+what was checked, and "What leaves this device" (the redacted payload preview). The committed config
+points `ASSISTANT_BASE` at `https://lantern-assistant.vercel.app`, which currently returns
+`DEPLOYMENT_NOT_FOUND`: until that deployment is restored, run `npm start` at the repo root and set
+`ASSISTANT_BASE = 'http://localhost:8787'` in `config.ts`, then rebuild. Without `QWEN_API_KEY` the
+server answers from the mock, which is fine for the demo.
+
+**The chat badges (only with a ready WhatsApp Web account).** A teammate sends the fake Maybank link
+from their phone and a 🔴 badge appears in the chat before anyone clicks; the real Maybank link shows
+🟢. Content scripts match `web.whatsapp.com`, `web.telegram.org` and `www.messenger.com`. Badge
+behaviour has only been checked against fixtures so far — rehearse on the real WhatsApp Web first.
+
+### If something goes wrong
+
+- **Gateway down or no internet:** run the gateway and enclave locally (`server/README.md`, "Local
+  development"), set `API_BASE = 'http://localhost:4000'`, rebuild.
+- **No backend at all:** `cd extension && npm run mock-api` serves canned verdicts on `:4000`; point
+  `API_BASE` there and rebuild. The warning page still fires because the on-device brand floor is
+  HIGH.
+- **Assistant offline:** `npm start` at the repo root serves the mock agent on `:8787`; point
+  `ASSISTANT_BASE` there.
+- **Laptop trouble:** a screen recording of a good run, made the night before.
 
 ---
 
