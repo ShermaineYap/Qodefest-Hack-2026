@@ -280,7 +280,9 @@ or the team server key.
 
 ## Demo runbook
 
-Verified against `main` on 2026-11-19. For the presenting laptop.
+Verified against `main` on 2026-11-19. For the presenting laptop. The full script — every link, the
+expected badge and score for each, plus assistant replies — is in
+[`docs/demo-script.md`](docs/demo-script.md).
 
 ### Setup (10 minutes)
 
@@ -302,7 +304,10 @@ Verified against `main` on 2026-11-19. For the presenting laptop.
    `cd extension && npm run sim`, and the enclave's `pytest` (11, see `server/README.md`).
    The sim loads the built extension into a throwaway Chromium, opens a fake WhatsApp Web chat and
    checks every badge; `-- --headed` watches it happen, `-- --live` scores against the deployed
-   gateway instead of its mock. It touches no real account or website.
+   gateway instead of its mock. It touches no real account or website. Setup once:
+   `npm install && npx playwright install chromium`. Current state: the badge and warning checks
+   pass (15/15), then the side-panel leg times out because the chat redesign removed `#result`
+   (T-050).
 
 ### The demo (~2 minutes)
 
@@ -325,7 +330,9 @@ through the badge pipeline and shows "What leaves this device" (the redacted pay
 **The chat badges (only with a ready WhatsApp Web account).** A teammate sends the fake Maybank link
 from their phone and a 🔴 badge appears in the chat before anyone clicks; the real Maybank link shows
 🟢. Content scripts match `web.whatsapp.com`, `web.telegram.org` and `www.messenger.com`. Badge
-behaviour has only been checked against fixtures so far — rehearse on the real WhatsApp Web first.
+behaviour has only been checked against the simulator so far — rehearse on real WhatsApp Web first.
+[`docs/demo-script.md`](docs/demo-script.md) has a six-message sequence that walks green → red →
+green → amber.
 
 ### If something goes wrong
 

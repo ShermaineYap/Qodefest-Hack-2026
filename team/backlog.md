@@ -10,6 +10,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
 | T-036 | Confirm your area in `roles.md` as part of the M0 ownership split | done | | | |
+| T-051 | Build the demo deck: 12 slides with three interactive simulations (chat badges, warning page, assistant panel) in `deck/lantern-demo-deck.html`, plus a refreshed README runbook. Renumbered from T-044 (taken by Fihkri in parallel) and restored here after a merge dropped the row | done | | | |
 
 ## Shermaine Yap
 
@@ -28,6 +29,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-042 | Redeploy the enclave (`./deploy.sh`) to ship the brand/deny-list floors from D-012 | todo | | Shermaine Yap | |
 | T-046 | Redeploy the gateway and verify a first scam returns `new_scam` and an exact repeat returns `known_scam` through the public tunnel (D-016) | todo | | | |
 | T-047 | Admin console: token-gated `POST /agent/admin/chat` (read-only SQL guardrails, summary fallback) and `/console` chat page (D-017) | done | | | |
+| T-048 | Fix `/agent/message` on the live deployment: it answers `503 {"detail":"agent_unavailable"}` (checked 2026-11-19), so the assistant panel can only show NOT CHECKED. Check `LLM_API_KEY` / `LLM_BASE_URL` inside the container and the model call itself; a failed key should be obvious before a demo. Verified locally that the same code answers from the keyword mock with no key | todo | | williamkee51 | before demo |
 
 ## Fihkri
 
@@ -38,3 +40,5 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-043 | Reload the extension and smoke-test the side panel: a pasted message goes to the Lantern Assistant; a link shows the badge plus "Ask Lantern Assistant to explain" (D-012, D-014) | todo | | Shermaine Yap | |
 | T-044 | Re-theme the warning page and side panel to `design/DESIGN.md`: tokens only, bundled IBM Plex, SVG tier marks, light/dark, reduced motion | done | | | |
 | T-045 | `npm run sim`: 3 checks fail on main (IP-literal `/verify` and `maybank2u.com.my@evil-site.top` expected 🔴, scored 🟡 because their floors are 60/70; the address-bar case follows). Decide: raise those floors to HIGH, or expect MEDIUM in the sim | todo | | Shermaine Yap | |
+| T-049 | Align `extension/scripts/mock-api.mjs` with the real floors: it treats `userinfo_obfuscation` and `insecure_login` as HIGH (score 90), while the live enclave gives 70 and 60 — both MEDIUM (`docs/demo-script.md` has the verified live numbers). The sim passes because it runs against the mock, so it overstates those two links. Align the mock with `server/enclave/app/rules.py`, or record in a decision why the demo mock may differ | todo | | williamkee51 | before demo |
+| T-050 | Fix the side-panel leg of `npm run sim`: the badge and warning checks pass (15/15), then it times out at `scripts/sim.mjs:221` waiting for `#result`, which the chat redesign removed (D-014). Update the selectors and assertions to the chat layout, then re-run | todo | | williamkee51 | before demo |
