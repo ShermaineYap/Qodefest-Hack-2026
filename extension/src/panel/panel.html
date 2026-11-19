@@ -32,7 +32,17 @@
           spellcheck="false"
           autocomplete="off"
         ></textarea>
-        <button id="check" type="button">Check</button>
+        <div id="attachment" class="attachment" hidden>
+          <img id="attachment-img" alt="" />
+          <span id="attachment-name" class="attachment__name"></span>
+          <button id="attachment-remove" type="button" class="attachment__remove" aria-label="Remove attachment">✕</button>
+        </div>
+        <div class="composer__row">
+          <button id="attach" type="button" class="button-attach" aria-label="Attach a screenshot">📎 <span id="attach-label">Attach</span></button>
+          <input id="file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+          <button id="check" type="button">Check</button>
+        </div>
+        <p id="attach-hint" class="muted attach-hint">You can also paste or drop a screenshot here.</p>
         <p id="input-error" class="error" role="alert" hidden></p>
       </form>
 

@@ -2,6 +2,11 @@
 
 Newest first. Only Shermaine's agent writes here.
 
+## 2026-11-19 14:35 +08
+- Did: Side panel can attach one screenshot (📎 button, paste, or drag and drop). PNG/JPEG/WebP only, shrunk on-device to ≤1600 px JPEG (≤4.5 MB data URL), shown as a thumbnail in the chat, removable before sending, kept in memory only. Sent as `image` with `kind: "screenshot"` to the gateway's `/agent/message` (D-013), which forwards it to the vision model and stores only mime and size. Tested in the real extension against the local gateway: a sample scam SMS screenshot (~51 KB after resizing) went through; mock mode answers "unsure" for any screenshot until `LLM_API_KEY` is set.
+- Next: Fahreza sets the model key so screenshots get a real verdict from `qwen-vl-plus`.
+- Blocked on / needs from others: Fahreza: `LLM_API_KEY` + redeploy (T-042).
+
 ## 2026-11-19 14:25 +08
 - Did: Rebuilt the extension side panel as a chat (D-014): conversation log, EN/BM toggle, verdict cards with "Why", one primary action, quick replies; link-free messages and "Ask Lantern Assistant to explain" now call the gateway's `/agent/message`; link checks keep `/risk/link` and now pass `localScore`. Removed the Vercel/`ASSISTANT_BASE` path. Tested the real built extension in Chrome against the gateway + enclave running locally: link → HIGH with brand evidence, message → scam card, all three messages stored in SQLite. Extension 29 tests pass; type-check and build clean.
 - Next: Fahreza sets `LLM_API_KEY` and redeploys so replies come from Qwen and BM messages are understood (mock is English keywords only); Fihkri reloads the extension.

@@ -18,6 +18,12 @@ const redaction = requireElement<HTMLDetailsElement>('redaction');
 const redactionList = requireElement<HTMLUListElement>('redaction-list');
 const log = requireElement<HTMLElement>('log');
 const starters = requireElement<HTMLElement>('starters');
+const attachButton = requireElement<HTMLButtonElement>('attach');
+const fileInput = requireElement<HTMLInputElement>('file');
+const attachmentBox = requireElement<HTMLElement>('attachment');
+const attachmentImg = requireElement<HTMLImageElement>('attachment-img');
+const attachmentName = requireElement<HTMLElement>('attachment-name');
+const attachmentRemove = requireElement<HTMLButtonElement>('attachment-remove');
 
 const COPIED_LABEL_MS = 2000;
 const BM_HINT = /\b(anda|puan|encik|akaun|segera|jangan|sila|wang|pindahkan|bayar|sekarang|hari ini)\b/i;
@@ -49,6 +55,13 @@ const T = {
     assistant: 'Lantern Assistant',
     footer: 'Nothing is saved. Closing this panel forgets everything.',
     redaction: 'What leaves this device',
+    attach: 'Attach',
+    attachHint: 'You can also paste or drop a screenshot here.',
+    attached: 'Screenshot attached',
+    badFile: 'Please attach a PNG, JPEG or WebP picture.',
+    tooBig: 'That picture is too large. Try a smaller screenshot.',
+    readFail: 'That picture could not be read.',
+    screenshotOnly: '(screenshot)',
     notes: {
       go_back: 'Good. Close that page and do not enter anything.',
       ask_someone: 'Show this to someone you trust before you open it.',
@@ -85,6 +98,13 @@ const T = {
     assistant: 'Pembantu Lantern',
     footer: 'Tiada apa yang disimpan. Menutup panel ini akan melupakan semuanya.',
     redaction: 'Apa yang keluar dari peranti ini',
+    attach: 'Lampir',
+    attachHint: 'Anda juga boleh tampal atau seret tangkapan skrin ke sini.',
+    attached: 'Tangkapan skrin dilampirkan',
+    badFile: 'Sila lampirkan gambar PNG, JPEG atau WebP.',
+    tooBig: 'Gambar itu terlalu besar. Cuba tangkapan skrin yang lebih kecil.',
+    readFail: 'Gambar itu tidak dapat dibaca.',
+    screenshotOnly: '(tangkapan skrin)',
     notes: {
       go_back: 'Bagus. Tutup halaman itu dan jangan masukkan apa-apa.',
       ask_someone: 'Tunjukkan ini kepada orang yang anda percaya sebelum membukanya.',
@@ -152,6 +172,8 @@ function paintStatic(): void {
   checkButton.textContent = L().check;
   requireElement('footer').textContent = L().footer;
   requireElement('redaction-title').textContent = L().redaction;
+  requireElement('attach-label').textContent = L().attach;
+  requireElement('attach-hint').textContent = L().attachHint;
   document.querySelectorAll<HTMLButtonElement>('.lang__btn').forEach((btn) => {
     btn.setAttribute('aria-pressed', String(btn.dataset.lang === lang));
   });
@@ -169,6 +191,109 @@ function renderStarters(): void {
   );
 }
 
+// ---------- attachment (one screenshot) ----------
+// The picture stays in memory only. It is shrunk on this device before it is sent, and the
+// gateway forwards it to the vision model without storing it (D-013).
+
+const IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const MAX_INPUT_BYTES = 15 * 1024 * 1024;
+const MAX_SIDE = 1600;
+const MAX_DATA_URL_CHARS = 4_500_000;
+
+let attachment: { dataUrl: string; name: string } | null = null;
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('decode'));
+    img.src = src;
+  });
+}
+
+function readAsDataUrl(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('read'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/** Downscale to MAX_SIDE and re-encode as JPEG so the upload stays small. */
+async function shrink(file: File): Promise<string> {
+  const original = await readAsDataUrl(file);
+  const img = await loadImage(original);
+  const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return original;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  for (const quality of [0.85, 0.7, 0.55]) {
+    const out = canvas.toDataURL('image/jpeg', quality);
+    if (out.length <= MAX_DATA_URL_CHARS) return out;
+  }
+  throw new Error('too-big');
+}
+
+async function attachFile(file: File | null | undefined): Promise<void> {
+  if (!file) return;
+  clearError();
+  if (!IMAGE_TYPES.has(file.type)) {
+    setError(L().badFile);
+    return;
+  }
+  if (file.size > MAX_INPUT_BYTES) {
+    setError(L().tooBig);
+    return;
+  }
+  try {
+    const dataUrl = await shrink(file);
+    attachment = { dataUrl, name: file.name || L().attached };
+    attachmentImg.src = dataUrl;
+    attachmentImg.alt = L().attached;
+    attachmentName.textContent = attachment.name;
+    attachmentBox.hidden = false;
+  } catch (error) {
+    setError(error instanceof Error && error.message === 'too-big' ? L().tooBig : L().readFail);
+  }
+}
+
+function clearAttachment(): void {
+  attachment = null;
+  attachmentImg.removeAttribute('src');
+  attachmentName.textContent = '';
+  attachmentBox.hidden = true;
+  fileInput.value = '';
+}
+
+attachButton.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => void attachFile(fileInput.files?.[0]));
+attachmentRemove.addEventListener('click', clearAttachment);
+input.addEventListener('paste', (event) => {
+  const item = Array.from(event.clipboardData?.items ?? []).find((i) => i.kind === 'file' && i.type.startsWith('image/'));
+  if (item) {
+    event.preventDefault();
+    void attachFile(item.getAsFile());
+  }
+});
+for (const target of [input, attachmentBox]) {
+  target.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    input.classList.add('is-dropping');
+  });
+  target.addEventListener('dragleave', () => input.classList.remove('is-dropping'));
+  target.addEventListener('drop', (event) => {
+    event.preventDefault();
+    input.classList.remove('is-dropping');
+    void attachFile(event.dataTransfer?.files?.[0]);
+  });
+}
+
 // ---------- conversation pieces ----------
 
 const CHECKED_LABEL: Record<Lang, Record<string, string>> = {
@@ -180,9 +305,16 @@ function checkedLabel(id: string): string {
   return CHECKED_LABEL[lang][id] ?? id.replace(/_/g, ' ');
 }
 
-function addUser(text: string): void {
+function addUser(text: string, image?: string): void {
   starters.hidden = true;
-  log.append(make('div', 'bubble bubble--user', text));
+  const bubble = make('div', 'bubble bubble--user', text);
+  if (image) {
+    const thumb = make('img', 'bubble__image');
+    thumb.src = image;
+    thumb.alt = L().attached;
+    bubble.prepend(thumb);
+  }
+  log.append(bubble);
   scrollToEnd();
 }
 
@@ -326,10 +458,10 @@ function isAskStatus(value: unknown): value is AskStatus {
   return status === 'answered' || status === 'not_checked';
 }
 
-async function requestAssistant(text: string): Promise<AskStatus> {
+async function requestAssistant(text: string, image?: string): Promise<AskStatus> {
   const locale: Lang = lang === 'ms' || BM_HINT.test(text) ? 'ms' : 'en';
   try {
-    const response: unknown = await chrome.runtime.sendMessage({ type: 'ask', text, locale });
+    const response: unknown = await chrome.runtime.sendMessage({ type: 'ask', text, locale, ...(image ? { image } : {}) });
     if (isAskStatus(response)) return response;
   } catch {
     // fall through: fail closed
@@ -419,9 +551,9 @@ function onQuickReply(id: string, label: string, card: HTMLElement, why: HTMLDet
   note(card, label);
 }
 
-async function askAssistant(raw: string): Promise<void> {
+async function askAssistant(raw: string, image?: string): Promise<void> {
   const pending = addPending(L().asking);
-  const status = await requestAssistant(raw);
+  const status = await requestAssistant(raw, image);
   pending.replaceWith(assistantCard(status, raw));
   scrollToEnd();
 }
@@ -432,24 +564,27 @@ async function submit(): Promise<void> {
   if (busy) return;
   clearError();
   const raw = input.value.trim();
-  if (raw === '') {
+  const image = attachment?.dataUrl;
+  if (raw === '' && !image) {
     setError(L().empty);
     return;
   }
   busy = true;
   checkButton.disabled = true;
-  addUser(raw);
+  addUser(raw || L().screenshotOnly, image);
   input.value = '';
+  clearAttachment();
   renderRedactionPreview('');
   try {
     let url: string | null = null;
     try {
-      url = extractFirstUrl(raw);
+      url = raw ? extractFirstUrl(raw) : null;
     } catch {
       url = null;
     }
+    // A link is scored by the badge pipeline; a screenshot or a message goes to the assistant.
     if (url) await checkLink(raw, url);
-    else await askAssistant(raw);
+    if (image || !url) await askAssistant(raw, image);
   } finally {
     busy = false;
     checkButton.disabled = false;

@@ -22,7 +22,7 @@ export type ExtensionMessage =
   | { type: 'get-verdict'; url: string }
   | { type: 'go-back' }
   | { type: 'continue'; url: string }
-  | { type: 'ask'; text: string; locale: 'en' | 'ms' };
+  | { type: 'ask'; text: string; locale: 'en' | 'ms'; image?: string };
 
 export type AssistantTier = 'HIGH' | 'MEDIUM' | 'LOW' | 'NOT_CHECKED';
 

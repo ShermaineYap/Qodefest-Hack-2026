@@ -151,6 +151,7 @@ const AGENT_COPY = {
     actions: { go_back: 'Go back to safety', ask_someone: 'Ask someone I trust', check_another: 'Check another' },
     replies: { why: 'Why?', clicked: 'What if I already clicked?', paid: 'I already paid', another: 'Check another' },
     checked: ['the words'],
+    screenshot: 'the screenshot',
     notChecked: ['who really sent it'],
   },
   ms: {
@@ -160,11 +161,12 @@ const AGENT_COPY = {
     actions: { go_back: 'Kembali ke tempat selamat', ask_someone: 'Tanya orang yang saya percaya', check_another: 'Semak yang lain' },
     replies: { why: 'Kenapa?', clicked: 'Kalau saya dah klik?', paid: 'Saya sudah bayar', another: 'Semak yang lain' },
     checked: ['perkataan'],
+    screenshot: 'tangkapan skrin',
     notChecked: ['siapa sebenarnya penghantar'],
   },
 };
 
-function parseAgent(raw: unknown, locale: 'en' | 'ms'): AssistantResult | null {
+function parseAgent(raw: unknown, locale: 'en' | 'ms', hadImage = false): AssistantResult | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const body = raw as Record<string, unknown>;
   const tier = typeof body.status === 'string' ? AGENT_TIER[body.status] : undefined;
@@ -191,7 +193,7 @@ function parseAgent(raw: unknown, locale: 'en' | 'ms'): AssistantResult | null {
     label: copy[tier as 'HIGH' | 'MEDIUM' | 'LOW'],
     summary: reply,
     reasons: stringArray(body.reasons, MAX_SENTENCES),
-    checked: copy.checked,
+    checked: hadImage ? [...copy.checked, copy.screenshot] : copy.checked,
     notChecked: copy.notChecked,
     action: action.label,
     actions: [action],
@@ -201,18 +203,22 @@ function parseAgent(raw: unknown, locale: 'en' | 'ms'): AssistantResult | null {
   };
 }
 
-async function askAssistant(text: string, locale: 'en' | 'ms'): Promise<AskStatus> {
+const IMAGE_PREFIXES = ['data:image/png;base64,', 'data:image/jpeg;base64,', 'data:image/webp;base64,'];
+const MAX_IMAGE_CHARS = 6_000_000;
+
+async function askAssistant(text: string, locale: 'en' | 'ms', image?: string): Promise<AskStatus> {
+  const okImage = typeof image === 'string' && image.length <= MAX_IMAGE_CHARS && IMAGE_PREFIXES.some((p) => image.startsWith(p));
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AGENT_TIMEOUT_MS);
   try {
     const response = await fetch(`${API_BASE}${AGENT_PATH}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ v: 1, client: 'extension', kind: 'chat', text: text.slice(0, 8000), ts: new Date().toISOString() }),
+      body: JSON.stringify({ v: 1, client: 'extension', kind: okImage ? 'screenshot' : 'chat', text: text.slice(0, 8000), ts: new Date().toISOString(), ...(okImage ? { image } : {}) }),
       signal: controller.signal,
     });
     if (!response.ok) return { status: 'not_checked', reason: 'The assistant did not answer. Treat this as unverified.' };
-    const result = parseAgent(await response.json(), locale);
+    const result = parseAgent(await response.json(), locale, okImage);
     if (!result) return { status: 'not_checked', reason: 'The assistant gave an answer I could not read.' };
     return { status: 'answered', result };
   } catch {
@@ -232,7 +238,7 @@ async function handle(
     case 'get-verdict':
       return getVerdict(message.url);
     case 'ask':
-      return askAssistant(message.text, message.locale);
+      return askAssistant(message.text, message.locale, message.image);
     case 'go-back': {
       const tabId = tabIdOf(sender);
       if (tabId === null) return { ok: false, reason: 'No tab to go back from.' };
