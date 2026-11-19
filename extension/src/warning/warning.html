@@ -9,10 +9,14 @@
   <body>
     <main class="wrap">
       <p class="eyebrow">Lantern</p>
-      <h1>
-        <span class="icon" aria-hidden="true">⚠️</span>
-        <span id="headline">This link may be a scam</span>
-      </h1>
+      <div class="verdict">
+        <svg class="tier-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+          <rect x="11" y="7.5" width="2" height="6" rx="1" fill="currentColor" />
+          <circle cx="12" cy="16.8" r="1.3" fill="currentColor" />
+        </svg>
+        <h1 id="headline">This link may be a scam</h1>
+      </div>
       <p class="lead" id="sentence">
         Lantern did not finish checking this address. Treat it as unverified.
       </p>
@@ -25,7 +29,7 @@
       </div>
       <p class="meta">
         What I checked: <span id="checked">not finished</span> · Request id:
-        <span id="request-id">unknown</span>
+        <span id="request-id" class="mono">unknown</span>
       </p>
     </main>
     <script src="./warning.js"></script>
