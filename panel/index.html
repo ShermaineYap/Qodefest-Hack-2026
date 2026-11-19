@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Ask SHOU</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <h1 id="title">Ask SHOU</h1>
+        </div>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-btn" data-lang="ms" aria-pressed="false">BM</button>
+        </div>
+      </header>
+
+      <main id="log" class="log" aria-live="polite" aria-relevant="additions"></main>
+
+      <form id="form" class="composer" novalidate>
+        <label class="sr-only" for="input" id="input-label">Paste a link or a message here.</label>
+        <textarea
+          id="input"
+          rows="3"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Paste a link or a message here."
+        ></textarea>
+        <div class="row">
+          <button type="button" id="page" class="ghost" hidden>Use this page</button>
+          <button type="submit" id="send" class="primary">Check this link</button>
+        </div>
+      </form>
+
+      <footer class="foot">
+        <p id="foot-note">We check the address and the words. We do not open the page.</p>
+      </footer>
+    </div>
+    <script src="panel.js"></script>
+  </body>
+</html>
