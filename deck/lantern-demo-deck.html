@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern — Demo &amp; Simulation Deck · Pattaya Fried Rice · Qodefest 2026</title>
+<style>
+  :root{
+    --page:#0a0f1a; --bg2:#0d1524; --panel:#111a2c; --card:#0f1829; --card2:#121d33;
+    --line:#22304d; --ink:#e9eefb; --mut:#93a3c4; --dim:#6b7a99;
+    --gold:#f5a524; --gold-soft:rgba(245,165,36,.14);
+    --red:#f87171; --red-soft:rgba(248,113,113,.12);
+    --amber:#fbbf24; --green:#34d399; --green-soft:rgba(52,211,153,.12);
+    --cyan:#38bdf8; --violet:#a78bfa;
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+    --radius:18px;
+  }
+  body[data-theme="day"]{
+    --page:#f4f6fb; --bg2:#ffffff; --panel:#ffffff; --card:#ffffff; --card2:#f7f9fd;
+    --line:#dbe3f0; --ink:#14213d; --mut:#5b6b8c; --dim:#8492ab;
+    --gold:#b7791f; --gold-soft:rgba(183,121,31,.12);
+    --red:#c2410c; --red-soft:rgba(194,65,12,.09);
+    --amber:#b45309; --green:#0f8a5f; --green-soft:rgba(15,138,95,.1);
+    --cyan:#0e7fb8; --violet:#7c3aed;
+    --shadow:0 14px 40px rgba(20,33,61,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--page); color:var(--ink);
+    font:16px/1.55 "Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+
+  /* ---------- deck chrome ---------- */
+  .progress{position:fixed;inset:0 auto auto 0;height:3px;width:0;background:linear-gradient(90deg,var(--gold),var(--red));z-index:60;transition:width .35s ease}
+  .topbar{position:fixed;inset:14px 22px auto 22px;display:flex;align-items:center;justify-content:space-between;z-index:55;pointer-events:none}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:650;letter-spacing:.2px;font-size:14px;color:var(--mut);pointer-events:auto}
+  .brand svg{width:22px;height:22px;filter:drop-shadow(0 0 10px rgba(245,165,36,.45))}
+  .tools{display:flex;gap:8px;pointer-events:auto}
+  .tool{
+    border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 88%,transparent);
+    color:var(--mut);font:12px/1 inherit;padding:8px 11px;border-radius:10px;cursor:pointer;
+    backdrop-filter:blur(6px);transition:.2s;
+  }
+  .tool:hover{color:var(--ink);border-color:var(--gold)}
+  .deck{position:relative}
+  .slide{
+    display:none;min-height:100vh;padding:86px clamp(24px,6vw,84px) 90px;
+    align-items:center;
+  }
+  .slide.active{display:flex;animation:enter .38s ease both}
+  @keyframes enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .wrap{width:min(1180px,100%);margin:0 auto}
+  .kick{
+    display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;
+  }
+  .kick::before{content:"";width:22px;height:1px;background:var(--gold);opacity:.7}
+  h1{font-size:clamp(40px,6vw,76px);line-height:1.03;margin:0 0 20px;letter-spacing:-.025em;font-weight:750}
+  h2{font-size:clamp(28px,3.6vw,44px);line-height:1.12;margin:0 0 22px;letter-spacing:-.02em;font-weight:720}
+  h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+  p{margin:0 0 12px}
+  .lead{font-size:clamp(17px,1.55vw,21px);color:var(--mut);max-width:70ch;line-height:1.6}
+  .accent{color:var(--gold)}
+  .small{font-size:13.5px;color:var(--mut)}
+  .mono.small{font-size:12.5px}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .card{
+    background:linear-gradient(180deg,var(--card2),var(--card));
+    border:1px solid var(--line);border-radius:var(--radius);padding:20px 20px 18px;
+    box-shadow:var(--shadow);
+  }
+  .card.tight{padding:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .chip{
+    font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;
+    border:1px solid var(--line);color:var(--mut);background:var(--panel);
+  }
+  .chip.c{border-color:color-mix(in srgb,var(--cyan) 45%,var(--line));color:var(--cyan)}
+  .chip.g{border-color:color-mix(in srgb,var(--green) 45%,var(--line));color:var(--green)}
+  .chip.a{border-color:color-mix(in srgb,var(--amber) 45%,var(--line));color:var(--amber)}
+  .chip.v{border-color:color-mix(in srgb,var(--violet) 45%,var(--line));color:var(--violet)}
+  .stat{font-size:clamp(34px,4vw,52px);font-weight:760;letter-spacing:-.03em;line-height:1;color:var(--gold)}
+  .stat.red{color:var(--red)} .stat.green{color:var(--green)}
+  .stat + p{margin-top:10px;color:var(--mut);font-size:14.5px;line-height:1.5}
+  .takeaway{
+    margin-top:22px;padding:16px 20px;border-left:3px solid var(--gold);
+    background:var(--gold-soft);border-radius:0 12px 12px 0;font-size:16.5px;
+  }
+  ul.clean{margin:8px 0 0;padding:0;list-style:none}
+  ul.clean li{position:relative;padding:6px 0 6px 20px;color:var(--mut);font-size:14.5px}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:14px;width:6px;height:6px;border-radius:2px;background:var(--gold);opacity:.8}
+  ul.clean.pos li::before{background:var(--green)}
+  ul.clean.neg li::before{background:var(--red)}
+  .muted-head{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:10px}
+  .rule{height:1px;background:var(--line);margin:20px 0}
+
+  /* ---------- cover ---------- */
+  .cover{position:relative;overflow:hidden}
+  .cover::after{
+    content:"";position:absolute;right:-140px;top:-120px;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,rgba(245,165,36,.18),transparent 62%);
+    pointer-events:none;
+  }
+  .cover .lantern{width:72px;height:72px;margin-bottom:26px;filter:drop-shadow(0 0 22px rgba(245,165,36,.5))}
+  .cover h1{max-width:18ch}
+  .hint{margin-top:34px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--dim)}
+  .key{border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 7px;font-size:11.5px;color:var(--mut);background:var(--panel)}
+
+  /* ---------- compare ---------- */
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .versus .card h3{display:flex;align-items:center;gap:8px}
+  .pill{font-size:11px;letter-spacing:.08em;padding:3px 8px;border-radius:999px;font-weight:700;text-transform:uppercase}
+  .pill.no{background:var(--red-soft);color:var(--red)}
+  .pill.yes{background:var(--green-soft);color:var(--green)}
+
+  /* ---------- pipeline ---------- */
+  .pipe{display:grid;gap:10px;margin-top:4px}
+  .step{
+    display:grid;grid-template-columns:38px 1fr auto;gap:14px;align-items:center;
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;background:var(--card);
+  }
+  .step .n{
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    background:var(--gold-soft);color:var(--gold);font-weight:750;font-size:14px;
+  }
+  .step b{font-size:14.5px}
+  .step span.tag{font-size:11.5px;color:var(--dim);white-space:nowrap}
+  .arrowdown{width:2px;height:12px;background:var(--line);margin-left:32px}
+  .rules-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .rules-table td{padding:7px 8px;border-bottom:1px solid var(--line);color:var(--mut)}
+  .rules-table td:last-child{text-align:right;color:var(--ink);font-weight:650}
+  .rules-table tr:last-child td{border-bottom:0}
+
+  /* ---------- simulation shared ---------- */
+  .sim{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;align-items:start;margin-top:8px}
+  .sim-controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .btn{
+    font:600 13.5px/1 inherit;padding:12px 16px;border-radius:11px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);cursor:pointer;transition:.18s;
+  }
+  .btn:hover{border-color:var(--gold);transform:translateY(-1px)}
+  .btn.primary{background:var(--gold);border-color:var(--gold);color:#171105}
+  .btn.ghost{background:transparent;color:var(--mut)}
+  .btn.danger{background:transparent;border-color:transparent;color:var(--red);text-decoration:underline;text-underline-offset:3px}
+  .note{
+    margin-top:14px;font-size:12.5px;color:var(--dim);border-top:1px dashed var(--line);padding-top:12px;
+  }
+
+  /* phone / chat */
+  .phone{
+    background:var(--panel);border:1px solid var(--line);border-radius:22px;overflow:hidden;
+    box-shadow:var(--shadow);min-height:360px;display:flex;flex-direction:column;
+  }
+  .phone-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--card2)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e0642c);display:grid;place-items:center;font-weight:750;font-size:13px;color:#1a1206}
+  .phone-bar b{font-size:14px}
+  .phone-bar span{font-size:11.5px;color:var(--dim)}
+  .chatlog{flex:1;padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:380px}
+  .bubble{
+    max-width:82%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;
+    animation:pop .22s ease both;
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+  .bubble.in{align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .bubble.out{align-self:flex-end;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-bottom-right-radius:4px}
+  .bubble .time{display:block;font-size:10.5px;color:var(--dim);margin-top:5px;text-align:right}
+  .linkline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .linkline a{color:var(--cyan);text-decoration:none;word-break:break-all;font-size:13px}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mut);
+    white-space:nowrap;transition:.25s;
+  }
+  .badge.pending{background:rgba(148,163,184,.12);color:var(--mut)}
+  .badge.high{background:var(--red-soft);border-color:color-mix(in srgb,var(--red) 45%,var(--line));color:var(--red)}
+  .badge.low{background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 45%,var(--line));color:var(--green)}
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .badge.high .dot{animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 6px rgba(248,113,113,0)}}
+
+  /* browser / warning */
+  .browser{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+  .browser-top{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card2);border-bottom:1px solid var(--line)}
+  .traffic{display:flex;gap:6px}
+  .traffic i{width:10px;height:10px;border-radius:50%;background:#f87171;display:block}
+  .traffic i:nth-child(2){background:#fbbf24}.traffic i:nth-child(3){background:#34d399}
+  .urlbar{flex:1;background:var(--page);border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--mut);font-family:ui-monospace,Consolas,monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .viewport{padding:26px;min-height:330px;display:grid;place-items:center}
+  .warncard{max-width:520px;width:100%;text-align:center;animation:pop .3s ease both}
+  .warncard .warn-icon{font-size:40px;line-height:1}
+  .warncard h3{font-size:23px;margin:12px 0 10px}
+  .warncard p{color:var(--mut);font-size:15px}
+  .warn-domain{display:inline-flex;align-items:center;gap:9px;margin:14px 0 4px;padding:10px 15px;border-radius:12px;background:var(--red-soft);border:1px solid color-mix(in srgb,var(--red) 35%,var(--line));font-family:ui-monospace,Consolas,monospace;font-size:13.5px;color:var(--red)}
+  .warn-actions{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:22px}
+  .warn-actions .btn{min-width:230px}
+  .fake{max-width:420px;width:100%;position:relative;animation:pop .3s ease both}
+  .ribbon{background:var(--red-soft);border:1px solid color-mix(in srgb,var(--red) 35%,var(--line));color:var(--red);font-size:12px;padding:8px 12px;border-radius:10px;margin-bottom:12px;text-align:center}
+  .fake-form{border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:22px}
+  .fake-form .field{height:36px;border-radius:8px;border:1px solid var(--line);background:var(--page);margin-top:10px;display:flex;align-items:center;padding:0 12px;color:var(--dim);font-size:12.5px}
+  .fake-form .submit{height:38px;border-radius:8px;background:var(--gold);color:#171105;display:grid;place-items:center;font-weight:700;font-size:13px;margin-top:16px;opacity:.9}
+  .state-ok{text-align:center;animation:pop .3s ease both}
+  .state-ok .big{font-size:44px;line-height:1}
+  .state-ok h3{margin-top:12px}
+
+  /* panel sim */
+  .panelsim{border:1px solid var(--line);border-radius:18px;background:var(--panel);overflow:hidden;box-shadow:var(--shadow)}
+  .panel-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--card2)}
+  .panel-head b{font-size:15px}
+  .panel-head span{font-size:11px;color:var(--dim)}
+  .panel-body{padding:16px 18px;min-height:400px}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .preset{font:600 12px/1 inherit;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--mut);cursor:pointer;transition:.18s}
+  .preset:hover,.preset.active{border-color:var(--gold);color:var(--gold)}
+  .msg{font-size:13.5px;color:var(--mut);border-left:2px solid var(--line);padding:2px 0 2px 12px;margin:10px 0 16px;font-style:italic}
+  .verdict-banner{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:13px;border:1px solid var(--line);animation:pop .25s ease both}
+  .verdict-banner.high{background:var(--red-soft);border-color:color-mix(in srgb,var(--red) 40%,var(--line))}
+  .verdict-banner.medium{background:rgba(251,191,36,.09);border-color:color-mix(in srgb,var(--amber) 40%,var(--line))}
+  .verdict-banner.low{background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+  .verdict-banner .emoji{font-size:24px}
+  .verdict-banner b{display:block;font-size:15px}
+  .verdict-banner span{font-size:12px;color:var(--mut)}
+  .verdict-score{margin-left:auto;font-weight:800;font-size:20px;letter-spacing:-.02em}
+  .verdict-banner.high .verdict-score{color:var(--red)}
+  .verdict-banner.medium .verdict-score{color:var(--amber)}
+  .verdict-banner.low .verdict-score{color:var(--green)}
+  .reasons{margin:14px 0 0;padding:0;list-style:none}
+  .reasons li{font-size:13.5px;padding:6px 0 6px 18px;position:relative;color:var(--ink)}
+  .reasons li::before{content:"•";position:absolute;left:2px;color:var(--gold)}
+  .checked{margin-top:14px;font-size:12px;color:var(--dim)}
+  .privacy{margin-top:16px;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+  .privacy summary{padding:10px 13px;font-size:12.5px;color:var(--mut);cursor:pointer;background:var(--card2);list-style:none;display:flex;justify-content:space-between;align-items:center}
+  .privacy summary::-webkit-details-marker{display:none}
+  .privacy summary::after{content:"▾";color:var(--dim);font-size:11px;transition:.2s}
+  .privacy[open] summary::after{transform:rotate(180deg)}
+  .privacy ul{margin:0;padding:12px 16px;list-style:none}
+  .privacy li{font-size:12px;padding:4px 0;color:var(--mut);font-family:ui-monospace,Consolas,monospace;display:flex;justify-content:space-between;gap:14px}
+  .privacy li b{color:var(--ink);font-weight:600}
+  .primary-action{margin-top:16px}
+
+  /* ---------- misc ---------- */
+  .status-grid .card{display:flex;flex-direction:column;gap:4px}
+  .status-grid .big{font-size:30px;font-weight:760;color:var(--gold);line-height:1.1}
+  .status-grid .lbl{font-size:13px;color:var(--mut)}
+  .roadmap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:6px}
+  .ms{border:1px solid var(--line);border-radius:13px;padding:14px 12px;background:var(--card);position:relative}
+  .ms b{display:block;font-size:12px;color:var(--gold);letter-spacing:.08em;margin-bottom:6px}
+  .ms span{font-size:11.5px;color:var(--mut);line-height:1.4;display:block}
+  .ms.done{border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+  .ms.done b{color:var(--green)}
+  .team{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .member{border:1px solid var(--line);border-radius:13px;padding:14px 16px;background:var(--card)}
+  .member b{display:block;font-size:14px}
+  .member span{font-size:11.5px;color:var(--mut)}
+  .close-line{margin-top:26px;font-size:clamp(20px,2.4vw,30px);font-weight:700;letter-spacing:-.01em}
+
+  .dots{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:7px;z-index:55}
+  .dots button{width:7px;height:7px;border-radius:50%;border:0;background:var(--line);cursor:pointer;padding:0;transition:.2s}
+  .dots button.on{background:var(--gold);transform:scale(1.35)}
+  .counter{position:fixed;right:24px;bottom:14px;font-size:12px;color:var(--dim);z-index:55;font-variant-numeric:tabular-nums}
+  .keyhint{position:fixed;left:24px;bottom:14px;font-size:11.5px;color:var(--dim);z-index:55}
+
+  @media (max-width:900px){
+    .g4,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .sim{grid-template-columns:1fr}
+    .roadmap{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .team{grid-template-columns:repeat(2,1fr)}
+    .slide{padding:76px 20px 86px}
+  }
+  @media (max-width:560px){
+    .g4,.g3,.g2,.versus{grid-template-columns:1fr}
+    .keyhint{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+  @media print{
+    .progress,.topbar,.dots,.counter,.keyhint,.sim-controls{display:none!important}
+    .slide{display:flex!important;min-height:auto;page-break-after:always;padding:40px}
+    body{background:#fff;color:#111}
+  }
+</style>
+</head>
+<body data-theme="night">
+<div class="progress" id="prog"></div>
+
+<div class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold)">
+      <path d="M9 3h6M10 3v3M14 3v3"/>
+      <path d="M7 6h10l-1.2 12.2a2 2 0 0 1-2 1.8h-3.6a2 2 0 0 1-2-1.8L7 6z"/>
+      <path d="M10 14.5c0-1.3 2-1.9 2-3.5 0 1.6 2 2.2 2 3.5a2 2 0 0 1-4 0z"/>
+    </svg>
+    Lantern
+  </div>
+  <div class="tools">
+    <button class="tool" id="themeBtn" title="Toggle day/night (D)">Day mode</button>
+    <button class="tool" id="printBtn" title="Print / Save as PDF">Print</button>
+  </div>
+</div>
+
+<main class="deck" id="deck">
+
+  <!-- 1 -------------------------------------------------------------- -->
+  <section class="slide active cover" data-title="Lantern">
+    <div class="wrap">
+      <svg class="lantern" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold)">
+        <path d="M9 3h6M10 3v3M14 3v3"/>
+        <path d="M7 6h10l-1.2 12.2a2 2 0 0 1-2 1.8h-3.6a2 2 0 0 1-2-1.8L7 6z"/>
+        <path d="M10 14.5c0-1.3 2-1.9 2-3.5 0 1.6 2 2.2 2 3.5a2 2 0 0 1-4 0z"/>
+      </svg>
+      <div class="kick">Pattaya Fried Rice · Qodefest Hack 2026</div>
+      <h1>See the link<br><span class="accent">before you click.</span></h1>
+      <p class="lead">A Chrome extension that reads the link in the conversation, says what is wrong in plain words, and makes “go back” the easy choice — plus an assistant you can ask about anything on the page.</p>
+      <div class="chips">
+        <span class="chip c">Chrome MV3</span>
+        <span class="chip g">On-device redaction</span>
+        <span class="chip a">Deterministic floors</span>
+        <span class="chip v">Fail closed</span>
+        <span class="chip">Assistant side panel</span>
+      </div>
+      <div class="hint">
+        <span><span class="key">←</span> <span class="key">→</span> to move</span>
+        <span><span class="key">D</span> day / night</span>
+        <span>Slides 5–7 are interactive simulations</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -------------------------------------------------------------- -->
+  <section class="slide" data-title="The problem">
+    <div class="wrap">
+      <div class="kick">The problem</div>
+      <h2>95% of online fraud is <span class="accent">authorised</span> by the victim.</h2>
+      <div class="grid g4">
+        <div class="card tight"><div class="stat red">95%</div><p>of cases involve the victim approving the transfer themselves. The stolen credential is not the attack.</p></div>
+        <div class="card tight"><div class="stat red">28%</div><p>of total scam losses fall on older adults — under 10% of victims.</p></div>
+        <div class="card tight"><div class="stat red">RM1.47B</div><p>lost to investment scams alone, coordinated mainly through chat apps.</p></div>
+        <div class="card tight"><div class="stat">hours</div><p>a new lookalike domain can be live and convincing before any blocklist catches it.</p></div>
+      </div>
+      <div class="takeaway">The link is the delivery mechanism. The chat carries the pressure; the link carries the theft. That conversation is visible immediately — and a plain blocklist throws it away.</div>
+    </div>
+  </section>
+
+  <!-- 3 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Why not just a blocklist">
+    <div class="wrap">
+      <div class="kick">Why not just Safe Browsing</div>
+      <h2>Keep the blocklist. Add the context it cannot see.</h2>
+      <div class="versus">
+        <div class="card">
+          <h3>Blocklist alone <span class="pill no">necessary, late</span></h3>
+          <ul class="clean neg">
+            <li>cannot explain <em>why</em> a link is bad</li>
+            <li>ignores the conversation that delivered it</li>
+            <li>arrives after a fresh domain already worked</li>
+            <li>red pages train people to click through</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Lantern <span class="pill yes">context + consequence</span></h3>
+          <ul class="clean pos">
+            <li>a blocklist hit stays a hard HIGH</li>
+            <li>reads the link where it arrived</li>
+            <li>says “it asks for your bank login, but it is not your bank”</li>
+            <li>slows the decision once, then gets out of the way</li>
+          </ul>
+        </div>
+      </div>
+      <p class="small" style="margin-top:18px">A clean link gets a badge too. An indicator that only appears on danger is indistinguishable from one that is broken.</p>
+    </div>
+  </section>
+
+  <!-- 4 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Two surfaces">
+    <div class="wrap">
+      <div class="kick">The product</div>
+      <h2>Two surfaces, one detection pipeline.</h2>
+      <div class="grid g3">
+        <div class="card">
+          <div class="muted-head">Passive</div>
+          <h3>Inline badges</h3>
+          <p class="small">Finds links in the conversation already on screen and marks each one in place — 🟢 low, 🟡 medium, 🔴 high, ⋯ checking, ⚠ not checked.</p>
+        </div>
+        <div class="card">
+          <div class="muted-head">Interrupt once</div>
+          <h3>Warning page</h3>
+          <p class="small">A HIGH top-level navigation is replaced by a calm page that names the consequence. “Go back to safety” is the default and the dominant action.</p>
+        </div>
+        <div class="card">
+          <div class="muted-head">Active</div>
+          <h3>Assistant panel</h3>
+          <p class="small">Paste a link or a whole message. The panel answers with evidence, shows what was checked and what could not be, and recommends one next step.</p>
+        </div>
+      </div>
+      <div class="takeaway">The guard is passive: no button to press. The assistant is active: for the moment she wants a second opinion.</div>
+    </div>
+  </section>
+
+  <!-- 5 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Simulation · chat">
+    <div class="wrap">
+      <div class="kick">Simulation 1 · the chat</div>
+      <h2>Danger is marked before anyone clicks.</h2>
+      <div class="sim">
+        <div>
+          <div class="phone">
+            <div class="phone-bar">
+              <div class="avatar">M</div>
+              <div><b>Auntie May</b><br><span>online</span></div>
+            </div>
+            <div class="chatlog" id="chatlog">
+              <div class="bubble in">Hi! Are you free this weekend?<span class="time">10:24</span></div>
+            </div>
+          </div>
+          <div class="sim-controls">
+            <button class="btn primary" data-chat="scam">Send the scam link</button>
+            <button class="btn" data-chat="legit">Send the real link</button>
+            <button class="btn ghost" data-chat="reset">Reset</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="muted-head">What the extension does</div>
+          <ul class="clean">
+            <li>reads the anchors already in the chat panel</li>
+            <li>redacts on the device before anything leaves</li>
+            <li>shows ⋯ while checking, never an invented green</li>
+            <li>keeps the worst verdict — a friendly follow-up cannot walk it back</li>
+          </ul>
+          <div class="note">Interactive simulation. In the real build the content script runs on <span class="mono">web.whatsapp.com</span>, <span class="mono">web.telegram.org</span> and <span class="mono">www.messenger.com</span>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Simulation · warning">
+    <div class="wrap">
+      <div class="kick">Simulation 2 · the warning page</div>
+      <h2>Interrupt once. Explain why. Make back easy.</h2>
+      <div class="sim">
+        <div>
+          <div class="browser">
+            <div class="browser-top">
+              <div class="traffic"><i></i><i></i><i></i></div>
+              <div class="urlbar" id="simUrl">https://maybank2u-secure-login.xyz/login</div>
+            </div>
+            <div class="viewport" id="warnViewport">
+              <div class="warncard" id="warnCard">
+                <div class="warn-icon">⚠️</div>
+                <h3>This link may be a scam</h3>
+                <p>It asks for your Maybank login, but it is not maybank.com.my.</p>
+                <div class="warn-domain"><span>🔴</span> maybank2u-secure-login.xyz</div>
+                <p class="small">Someone you trust can help you check it first.</p>
+                <div class="warn-actions">
+                  <button class="btn primary" id="warnBack">Go back to safety</button>
+                  <button class="btn danger" id="warnCont">Continue anyway</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="muted-head">Design rules</div>
+          <ul class="clean">
+            <li>back is filled; continue is plain text</li>
+            <li>no countdown, no pre-selection</li>
+            <li>consequence, not mechanics: “not your bank”</li>
+            <li>HIGH interrupts once; MEDIUM only annotates</li>
+          </ul>
+          <div class="note">On-device brand rules floor this address at <b>85</b>, so the verdict stays HIGH even when the server alone scores it lower.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Simulation · assistant">
+    <div class="wrap">
+      <div class="kick">Simulation 3 · the assistant panel</div>
+      <h2>Evidence, not prose — and a privacy ledger.</h2>
+      <div class="sim">
+        <div class="panelsim">
+          <div class="panel-head"><b>Lantern</b><span>side panel</span></div>
+          <div class="panel-body">
+            <div class="presets">
+              <button class="preset active" data-sms="maybank">Scam SMS</button>
+              <button class="preset" data-sms="parcel">Parcel fee</button>
+              <button class="preset" data-sms="legit">Real receipt</button>
+            </div>
+            <div id="panelStage"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="muted-head">Why this is different</div>
+          <ul class="clean">
+            <li>every claim maps to a tool result</li>
+            <li>shows what was checked and what could not be</li>
+            <li>pasted text and tool output are untrusted data, never instructions</li>
+            <li>thin evidence becomes MEDIUM or NOT CHECKED — never a confident LOW</li>
+            <li>memory only: closing the panel forgets everything</li>
+          </ul>
+          <div class="note">Simulated response matching the verified local mock run (HIGH, 85, rules only, 2026-11-19).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -------------------------------------------------------------- -->
+  <section class="slide" data-title="How it works">
+    <div class="wrap">
+      <div class="kick">How it works</div>
+      <h2>Redact on the device. Score away from it.</h2>
+      <div class="grid g2" style="align-items:start">
+        <div class="pipe">
+          <div class="step"><div class="n">1</div><div><b>Discover</b><br><span class="small">anchors in the chat, top-level navigations, pasted text</span></div><span class="tag">content script · panel</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">2</div><div><b>Normalise + redact on-device</b><br><span class="small">keep domain, TLD, path shape, structural flags; drop query, text, PII</span></div><span class="tag">redact.ts</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">3</div><div><b>Service worker</b><br><span class="small">the only network surface</span></div><span class="tag">background.ts</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">4</div><div><b>Gateway :4000</b><br><span class="small">transport only — no text, no verdict of its own</span></div><span class="tag">FastAPI · compose</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">5</div><div><b>Enclave :3100</b><br><span class="small">re-derives signals from flags; deterministic floors; worst wins</span></div><span class="tag">private network only</span></div>
+        </div>
+        <div class="card">
+          <div class="muted-head">Floors that always run</div>
+          <table class="rules-table">
+            <tr><td>Deny-list hit</td><td>95</td></tr>
+            <tr><td>Brand outside its real domain</td><td>85</td></tr>
+            <tr><td>Punycode / mixed script / homoglyph</td><td>80</td></tr>
+            <tr><td>Userinfo obfuscation</td><td>70</td></tr>
+            <tr><td>IP literal · insecure login</td><td>60</td></tr>
+            <tr><td>Shortener / open redirect</td><td>45</td></tr>
+            <tr><td>Suspicious TLD</td><td>25</td></tr>
+          </table>
+          <p class="small" style="margin-top:14px">Floors are minimums, never ceilings. Models may add evidence; code owns the number.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Trust boundary">
+    <div class="wrap">
+      <div class="kick">Trust boundary</div>
+      <h2>What leaves the device is not the URL.</h2>
+      <div class="versus">
+        <div class="card">
+          <h3>Leaves the device</h3>
+          <ul class="clean">
+            <li>registrable domain + TLD</li>
+            <li>coarse path shape — <span class="mono">/login</span>, <span class="mono">/claim</span></li>
+            <li>structural flags — IP literal, subdomain count, punycode</li>
+            <li>hashed session id</li>
+            <li>tier, score, pattern names, request id</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Never leaves the device</h3>
+          <ul class="clean neg">
+            <li>full URL with query string</li>
+            <li>page text, chat text, cookies</li>
+            <li>email, phone, NRIC, card, account, wallet</li>
+            <li>contact names, thread titles</li>
+            <li>browsing history, click history, verdict log</li>
+          </ul>
+        </div>
+      </div>
+      <div class="takeaway">Nothing is written to disk. A record of what has been trying to scam her is useful to exactly one other party.</div>
+    </div>
+  </section>
+
+  <!-- 10 ------------------------------------------------------------- -->
+  <section class="slide" data-title="Fail closed">
+    <div class="wrap">
+      <div class="kick">Non-negotiable rules</div>
+      <h2>If Lantern cannot check, it says so.</h2>
+      <div class="grid g2">
+        <div class="card tight"><h3>NOT CHECKED is never LOW</h3><p class="small">Backend unreachable, timeout, unreadable answer — all become “could not check”. No verdict is invented.</p></div>
+        <div class="card tight"><h3>The worst verdict wins</h3><p class="small">The newest answer never walks a HIGH back to green in the seconds that matter.</p></div>
+        <div class="card tight"><h3>No model may lower a floor</h3><p class="small">Models supply evidence. Code owns the threshold. A failed model drops out; it is not a vote for LOW.</p></div>
+        <div class="card tight"><h3>No policy id, no scoring</h3><p class="small">Every verdict is filed against a policy, so a swapped session id cannot launder a HIGH away.</p></div>
+      </div>
+      <p class="small" style="margin-top:20px">Selector drift is treated the same way: a broken read is reported as NOT CHECKED, not shown as green.</p>
+    </div>
+  </section>
+
+  <!-- 11 ------------------------------------------------------------- -->
+  <section class="slide" data-title="Built today">
+    <div class="wrap">
+      <div class="kick">Built today</div>
+      <h2>A working slice, not a mockup.</h2>
+      <div class="grid g4 status-grid">
+        <div class="card tight"><div class="big">61</div><div class="lbl">tests green — 21 agent fixtures, 29 extension, 11 enclave</div></div>
+        <div class="card tight"><div class="big">3</div><div class="lbl">surfaces built: inline badges, warning page, assistant panel</div></div>
+        <div class="card tight"><div class="big">2</div><div class="lbl">services live behind a Cloudflare tunnel — gateway + enclave</div></div>
+        <div class="card tight"><div class="big">1</div><div class="lbl">contract shared by extension and server (<span class="mono">/risk/link</span> v0.1)</div></div>
+      </div>
+      <div class="grid g2" style="margin-top:16px">
+        <div class="card">
+          <div class="muted-head">Working</div>
+          <ul class="clean pos">
+            <li>on-device rules and redaction, unit-tested</li>
+            <li>live scoring API and fail-closed client</li>
+            <li>assistant chat on <span class="mono">/agent/message</span> (text or screenshot)</li>
+            <li>end-to-end sim: <span class="mono">npm run sim</span> loads the extension and checks badges</li>
+            <li>demo runbook in the README</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="muted-head">Honest gaps</div>
+          <ul class="clean neg">
+            <li>badge behaviour not yet rehearsed on real WhatsApp Web</li>
+            <li>model check falls back to a keyword mock without a key</li>
+            <li>no eval gate yet — 60 fixtures are M5</li>
+            <li>models fuse after M2</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 ------------------------------------------------------------- -->
+  <section class="slide" data-title="Roadmap and team">
+    <div class="wrap">
+      <div class="kick">What is next</div>
+      <h2>From one honest slice to a measured gate.</h2>
+      <div class="roadmap">
+        <div class="ms done"><b>M0</b><span>Decisions locked: panel, URL-only v1, memory-only, budgets</span></div>
+        <div class="ms"><b>M1</b><span>Thin slice: panel, one score_url call, every state</span></div>
+        <div class="ms"><b>M2</b><span>Bounded loop: streaming, tool allowlist, evidence ledger</span></div>
+        <div class="ms"><b>M3</b><span>Hardening: injection, SSRF, rate limit, kill switch</span></div>
+        <div class="ms"><b>M4</b><span>Senior UX: grade-6 copy, EN/MS, 3 older adults</span></div>
+        <div class="ms"><b>M5</b><span>60 fixtures · 0 HIGH on 20 legit · ≥90% phish · p95 ≤ 8s</span></div>
+      </div>
+      <div class="team">
+        <div class="member"><b>williamkee51</b><span>Lead · overall direction</span></div>
+        <div class="member"><b>Shermaine Yap</b><span>Assistant · integrations</span></div>
+        <div class="member"><b>Fahreza Alghifari</b><span>Backend · gateway, enclave, deploy</span></div>
+        <div class="member"><b>Fihkri</b><span>Chrome extension · panel, worker</span></div>
+      </div>
+      <div class="close-line">Ask Lantern before you click.</div>
+      <p class="small" style="margin-top:10px">Team Pattaya Fried Rice · Qodefest Hack 2026 · Deck built from the repository at <span class="mono">main</span>, 2026-11-19.</p>
+    </div>
+  </section>
+
+</main>
+
+<nav class="dots" id="dots" aria-label="Slide navigation"></nav>
+<div class="counter" id="counter">01 / 12</div>
+<div class="keyhint">← → move · D day/night · P print</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- deck ---------- */
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const dots = document.getElementById("dots");
+  const counter = document.getElementById("counter");
+  const prog = document.getElementById("prog");
+  let cur = 0;
+
+  slides.forEach((slide, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-label", "Go to slide " + (i + 1) + (slide.dataset.title ? ": " + slide.dataset.title : ""));
+    b.addEventListener("click", () => show(i));
+    dots.appendChild(b);
+  });
+  const dotEls = Array.from(dots.children);
+
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => s.classList.toggle("active", n === cur));
+    dotEls.forEach((d, n) => d.classList.toggle("on", n === cur));
+    counter.textContent = String(cur + 1).padStart(2, "0") + " / " + String(slides.length).padStart(2, "0");
+    prog.style.width = ((cur + 1) / slides.length) * 100 + "%";
+    if (location.hash !== "#s" + (cur + 1)) history.replaceState(null, "", "#s" + (cur + 1));
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); show(cur + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(cur - 1); }
+    else if (e.key === "Home") { e.preventDefault(); show(0); }
+    else if (e.key === "End") { e.preventDefault(); show(slides.length - 1); }
+    else if (e.key === "d" || e.key === "D") { toggleTheme(); }
+    else if (e.key === "p" || e.key === "P") { window.print(); }
+  });
+
+  const startAt = parseInt((location.hash.match(/^#s(\d+)$/) || [])[1] || "1", 10) - 1;
+  show(Number.isFinite(startAt) ? startAt : 0);
+
+  /* ---------- theme ---------- */
+  const themeBtn = document.getElementById("themeBtn");
+  function applyTheme(t) {
+    document.body.dataset.theme = t;
+    themeBtn.textContent = t === "day" ? "Night mode" : "Day mode";
+    try { localStorage.setItem("lantern-deck-theme", t); } catch (_) {}
+  }
+  function toggleTheme() {
+    applyTheme(document.body.dataset.theme === "day" ? "night" : "day");
+  }
+  themeBtn.addEventListener("click", toggleTheme);
+  try {
+    const saved = localStorage.getItem("lantern-deck-theme");
+    if (saved === "day" || saved === "night") applyTheme(saved);
+  } catch (_) {}
+  document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+  /* ---------- simulation 1: chat badges ---------- */
+  const chatlog = document.getElementById("chatlog");
+  let chatTimers = [];
+  const CHAT = {
+    scam: {
+      text: "URGENT: Your Maybank2u account is suspended. Verify now:",
+      url: "http://maybank2u-secure-login.xyz/login",
+      badge: "high",
+      label: "🔴 Scam link — do not enter your password"
+    },
+    legit: {
+      text: "Your statement is ready:",
+      url: "https://www.maybank2u.com.my/",
+      badge: "low",
+      label: "🟢 Nothing unusual"
+    }
+  };
+
+  function timeNow() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+
+  function pushBubble(html, cls) {
+    const el = document.createElement("div");
+    el.className = "bubble " + (cls || "in");
+    el.innerHTML = html + '<span class="time">' + timeNow() + "</span>";
+    chatlog.appendChild(el);
+    chatlog.scrollTop = chatlog.scrollHeight;
+    return el;
+  }
+
+  function sendChat(kind) {
+    const data = CHAT[kind];
+    if (!data) return;
+    const bubble = document.createElement("div");
+    bubble.className = "bubble in";
+    bubble.innerHTML =
+      "<div>" + data.text + "</div>" +
+      '<div class="linkline"><a href="#" onclick="return false">' + data.url + "</a>" +
+      '<span class="badge pending"><span class="dot"></span>⋯ Checking</span></div>' +
+      '<span class="time">' + timeNow() + "</span>";
+    chatlog.appendChild(bubble);
+    chatlog.scrollTop = chatlog.scrollHeight;
+
+    const badge = bubble.querySelector(".badge");
+    const t = setTimeout(function () {
+      badge.className = "badge " + data.badge;
+      badge.innerHTML = '<span class="dot"></span>' + data.label;
+      chatlog.scrollTop = chatlog.scrollHeight;
+    }, 1400);
+    chatTimers.push(t);
+  }
+
+  function resetChat() {
+    chatTimers.forEach(clearTimeout);
+    chatTimers = [];
+    chatlog.innerHTML = '<div class="bubble in">Hi! Are you free this weekend?<span class="time">10:24</span></div>';
+  }
+
+  document.querySelectorAll("[data-chat]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const kind = btn.dataset.chat;
+      if (kind === "reset") resetChat();
+      else sendChat(kind);
+    });
+  });
+
+  /* ---------- simulation 2: warning page ---------- */
+  const warnViewport = document.getElementById("warnViewport");
+  const warnCard = document.getElementById("warnCard");
+  const simUrl = document.getElementById("simUrl");
+  const WARN_HTML = warnCard.outerHTML;
+
+  function resetWarning() {
+    simUrl.textContent = "https://maybank2u-secure-login.xyz/login";
+    warnViewport.innerHTML = WARN_HTML;
+    bindWarning();
+  }
+
+  function bindWarning() {
+    const back = document.getElementById("warnBack");
+    const cont = document.getElementById("warnCont");
+    if (back) back.addEventListener("click", function () {
+      warnViewport.innerHTML =
+        '<div class="state-ok">' +
+        '<div class="big">🛡️</div>' +
+        '<h3>You went back to safety.</h3>' +
+        '<p class="small">Nothing was opened and nothing was entered.</p>' +
+        '<button class="btn primary" id="warnAgain" style="margin-top:14px">Run it again</button>' +
+        "</div>";
+      const again = document.getElementById("warnAgain");
+      if (again) again.addEventListener("click", resetWarning);
+    });
+    if (cont) cont.addEventListener("click", function () {
+      simUrl.textContent = "https://maybank2u-secure-login.xyz/login";
+      warnViewport.innerHTML =
+        '<div class="fake">' +
+        '<div class="ribbon">You chose to continue. In the real extension this is the tab you land on.</div>' +
+        '<div class="fake-form">' +
+        '<b style="font-size:15px">Maybank2u — Sign in</b>' +
+        '<div class="field">Username</div>' +
+        '<div class="field">Password</div>' +
+        '<div class="submit">Sign in</div>' +
+        '<p class="small" style="margin-top:12px">Notice the address: <span class="mono">maybank2u-secure-login.xyz</span> — not <span class="mono">maybank2u.com.my</span>.</p>' +
+        "</div>" +
+        '<button class="btn ghost" id="warnAgain2" style="margin-top:12px">Back to the warning</button>' +
+        "</div>";
+      const again = document.getElementById("warnAgain2");
+      if (again) again.addEventListener("click", resetWarning);
+    });
+  }
+  bindWarning();
+
+  /* ---------- simulation 3: assistant panel ---------- */
+  const stage = document.getElementById("panelStage");
+  const SMS = {
+    maybank: {
+      message: "URGENT: Your Maybank2u account is suspended. Verify at http://maybank2u-secure-login.xyz/login within 24 hours or your account will be closed.",
+      tier: "high",
+      emoji: "🔴",
+      title: "This looks like a scam",
+      score: 85,
+      reasons: [
+        "This is not Maybank's address. The real one is maybank2u.com.my.",
+        "It asks for a bank login, but it is not your bank.",
+        "The address ends in .xyz, often used by throwaway scam sites."
+      ],
+      checked: ["domain", "path type", "local rules"],
+      leaves: [
+        ["registrable", "maybank2u-secure-login.xyz"],
+        ["path shape", "/login"],
+        ["flags", "suspicious_tld, hyphen_heavy"],
+        ["redacted", "2 query params"]
+      ],
+      never: "message text, phone number, contact name"
+    },
+    parcel: {
+      message: "PosLaju: your parcel is held. Pay the RM2 redelivery fee here: https://poslaju-redelivery.click/track",
+      tier: "high",
+      emoji: "🔴",
+      title: "This looks like a scam",
+      score: 95,
+      reasons: [
+        "This address is on a known-scam list.",
+        "It imitates a delivery notice to collect a small payment.",
+        "Nothing on this page is part of PosLaju's real checkout."
+      ],
+      checked: ["domain", "deny list", "path type"],
+      leaves: [
+        ["registrable", "poslaju-redelivery.click"],
+        ["path shape", "/track"],
+        ["flags", "deny_list"],
+        ["redacted", "0"]
+      ],
+      never: "message text, phone number, tracking number"
+    },
+    legit: {
+      message: "Your Maybank2u statement is ready. Sign in at https://www.maybank2u.com.my/",
+      tier: "low",
+      emoji: "🟢",
+      title: "Nothing unusual",
+      score: 0,
+      reasons: ["The address is Maybank's real domain.", "No credential-harvest pattern matched."],
+      checked: ["domain", "local rules"],
+      leaves: [
+        ["registrable", "maybank2u.com.my"],
+        ["path shape", "/"],
+        ["flags", "none"],
+        ["redacted", "0"]
+      ],
+      never: "message text"
+    }
+  };
+
+  function renderSms(key) {
+    const d = SMS[key];
+    if (!d) return;
+    stage.innerHTML =
+      '<div class="msg">“' + d.message + '”</div>' +
+      '<div class="verdict-banner ' + d.tier + '">' +
+      '<span class="emoji">' + d.emoji + "</span>" +
+      "<div><b>" + d.title + "</b><span>" + (d.tier === "low" ? "Nothing unusual about this link." : "Do not enter your password or bank details.") + "</span></div>" +
+      '<span class="verdict-score">' + d.score + "</span>" +
+      "</div>" +
+      '<ul class="reasons">' + d.reasons.map(function (r) { return "<li>" + r + "</li>"; }).join("") + "</ul>" +
+      '<div class="checked">What I checked: ' + d.checked.join(" · ") + "</div>" +
+      '<details class="privacy"><summary>What leaves this device</summary><ul>' +
+      d.leaves.map(function (p) { return "<li><b>" + p[0] + "</b><span>" + p[1] + "</span></li>"; }).join("") +
+      '<li><b>never sent</b><span>' + d.never + "</span></li>" +
+      "</ul></details>" +
+      '<div class="primary-action"><button class="btn ' + (d.tier === "low" ? "" : "primary") + '" onclick="return false">' +
+      (d.tier === "low" ? "Open the real site" : "Go back to safety") + "</button></div>";
+  }
+
+  document.querySelectorAll("[data-sms]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll("[data-sms]").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      renderSms(btn.dataset.sms);
+    });
+  });
+  renderSms("maybank");
+})();
+</script>
+</body>
+</html>

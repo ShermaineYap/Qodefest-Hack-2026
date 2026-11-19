@@ -10,6 +10,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
 | T-036 | Confirm your area in `roles.md` as part of the M0 ownership split | done | | | |
+| T-044 | Build the demo deck: 12 slides with three interactive simulations (chat badges, warning page, assistant panel) in `deck/lantern-demo-deck.html`, plus a refreshed README runbook | done | | | |
 
 ## Shermaine Yap
 

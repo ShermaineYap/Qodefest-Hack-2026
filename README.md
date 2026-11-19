@@ -296,10 +296,11 @@ Verified against `main` on 2026-11-19. For the presenting laptop.
 3. Check the gateway: `curl <API_BASE>/health` returns `{"status":"ok"}`. `API_BASE` lives in
    `extension/src/config.ts`. The Cloudflare quick-tunnel host changes whenever it restarts — refresh
    it from [`server/README.md`](server/README.md) ("Deployment"), update `config.ts`, rebuild.
-4. Optional sanity checks: `npm test` at the repo root (21 tests), `cd extension && npm test` (25),
-   and the enclave's `pytest` (11, see `server/README.md`).
-
-There is no `npm run sim` in this repository yet; use the fallbacks below.
+4. Optional sanity checks: `npm test` at the repo root (21 tests), `cd extension && npm test` (29),
+   `cd extension && npm run sim`, and the enclave's `pytest` (11, see `server/README.md`).
+   The sim loads the built extension into a throwaway Chromium, opens a fake WhatsApp Web chat and
+   checks every badge; `-- --headed` watches it happen, `-- --live` scores against the deployed
+   gateway instead of its mock. It touches no real account or website.
 
 ### The demo (~2 minutes)
 
@@ -309,12 +310,11 @@ when the gateway alone would score it lower. Press **Go back to safety**, then o
 show nothing gets in the way. The gateway must answer for the warning to appear; if it does not, the
 extension shows NOT CHECKED instead of warning (fail closed).
 
-**The side panel.** Click the Lantern icon and paste a whole scam SMS. The panel shows the verdict,
-what was checked, and "What leaves this device" (the redacted payload preview). The committed config
-points `ASSISTANT_BASE` at `https://lantern-assistant.vercel.app`, which currently returns
-`DEPLOYMENT_NOT_FOUND`: until that deployment is restored, run `npm start` at the repo root and set
-`ASSISTANT_BASE = 'http://localhost:8787'` in `config.ts`, then rebuild. Without `QWEN_API_KEY` the
-server answers from the mock, which is fine for the demo.
+**The side panel.** Click the Lantern icon and paste a whole scam SMS. The panel sends the text to
+the gateway's `/agent/message` on the same tunnel as `/risk/link` (D-014) and shows the verdict, the
+reasons and what was checked. A screenshot can be pasted, dropped or attached. The server answers
+from a keyword mock when no model key is set, which is fine for the demo. A pasted link still goes
+through the badge pipeline and shows "What leaves this device" (the redacted payload preview).
 
 **The chat badges (only with a ready WhatsApp Web account).** A teammate sends the fake Maybank link
 from their phone and a 🔴 badge appears in the chat before anyone clicks; the real Maybank link shows
@@ -328,8 +328,9 @@ behaviour has only been checked against fixtures so far — rehearse on the real
 - **No backend at all:** `cd extension && npm run mock-api` serves canned verdicts on `:4000`; point
   `API_BASE` there and rebuild. The warning page still fires because the on-device brand floor is
   HIGH.
-- **Assistant offline:** `npm start` at the repo root serves the mock agent on `:8787`; point
-  `ASSISTANT_BASE` there.
+- **Assistant offline:** the panel and link checks share `API_BASE`, so the gateway fix above covers
+  both. The standalone Ask SHOU demo (`npm start`, `:8787`) is a separate app and is not called by
+  the extension.
 - **Laptop trouble:** a screen recording of a good run, made the night before.
 
 ---
