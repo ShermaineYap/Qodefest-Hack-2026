@@ -1,3 +1,8 @@
+## 2026-11-19 06:42
+- Did: Rebuilt the dashboard root `/` as an ops overview (D-020): KPI cards for checks, scam rate, new scams and repeat scams; a 24-hour stacked volume chart; verdict mix, scam novelty, top clients and checker-model meters; kind + verdict filters; and the existing expandable message log. Everything is computed client-side from `GET /agent/messages?limit=100`, labelled as the latest window, and the gateway-down/empty states stay explicit. Mobile table scroll no longer moves the page; `npm run build` passes and the UI was checked in headless Chromium at 1440px and 390px with 40 seeded rows.
+- Next: T-046 — redeploy the gateway and verify `new_scam` / `known_scam` through the public tunnel.
+- Blocked on / needs from others: nothing.
+
 # Session log — Fahreza
 
 Newest first. Only Fahreza's agent writes here.
