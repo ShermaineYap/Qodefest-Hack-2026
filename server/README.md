@@ -297,7 +297,8 @@ see `dashboard/THIRD_PARTY_NOTICES.md`).
   `server/index.ts`, :8787/Vercel) is still not part of this compose stack.
 - **Fuzzy scam matching.** New-vs-known compares the exact normalized text (or URL when text is
   empty). A reworded or partly edited repeat counts as a new scam; there is no fuzzy hash, shared
-  threat feed or cross-host cache yet.
+  threat feed or cross-host cache yet. A screenshot-only message with no text or URL cannot be
+  deduplicated.
 - **Auth / rate limits on the message endpoint.** `POST /agent/message` and `GET /agent/messages`
   have none; anyone with the tunnel URL can spend model tokens and read stored messages.
   `/agent/admin/chat` requires `ADMIN_TOKEN` but has no rate limit. Add both before publicising the
