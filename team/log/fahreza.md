@@ -2,6 +2,11 @@
 
 Newest first. Only Fahreza's agent writes here.
 
+## 2026-11-19 05:49
+- Did: Replaced the placeholder page with a read-only dashboard at `/` (D-011): Next.js app in `dashboard/`, newest-first message table with expandable payloads, 5 s auto-refresh, explicit gateway-down state with no fabricated data. No new API — it polls `GET /agent/messages`. Updated compose to build `./repo/dashboard`, root README and `server/README.md`. Verified through the tunnel: root 200 with expected markup, JS chunks 200, messages endpoint 200. No browser on the host, so verification was HTTP-level only.
+- Next: T-034 — remaining rules, model fusion/verifier, real agent endpoint (replaces the SQLite stub).
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 05:48
 - Did: Added the dummy agent log endpoints (D-009): `POST /agent/message` validates a loose message from the extension and stores it in SQLite, `GET /agent/messages` reads the last N back. Gateway now owns a `messages` table at `/srv/data/messages.db` (bind-mounted to `/data`), with 6 gateway pytest cases and docs in `server/README.md`. Verified through the public tunnel: stored id 1, read it back, file visible on the host. Also refreshed the root README status table.
 - Next: T-034 — remaining rules, model fusion/verifier, real agent endpoint (replaces the SQLite stub).

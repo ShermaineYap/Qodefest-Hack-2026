@@ -17,7 +17,7 @@ extension / curl
       ▼
 Cloudflare quick tunnel  ──►  nginx (compose `proxy`, :80)
                                  ├── /risk/*, /agent*, /health, /api/ping ──► gateway:4000
-                                 └── everything else ──────────────────────► web:3000 (placeholder page)
+                                 └── everything else ──────────────────────► web:3000 (dashboard)
                                                                               │
                                                               gateway ──► enclave:3100  (internal only)
 ```
@@ -173,6 +173,12 @@ gateway container), so it survives rebuilds. This is deliberately temporary; see
 Returns `ping` as text. Temporary connectivity check while the extension is unwired; will be removed
 once `/risk/link` is in real use. Do not build product behaviour on it.
 
+### Dashboard (`/`)
+
+The tunnel root serves a read-only Next.js dashboard (`dashboard/` in the repo) that polls
+`GET /agent/messages?limit=50` every 5 s from the browser (same origin, so no CORS). No auth. When
+the gateway is unreachable it says so and shows the last rows it received — it never fabricates data.
+
 ### Not implemented yet — do not assume
 
 - **Server-side re-redaction.** The payload is already redacted by the extension; the enclave does
@@ -233,7 +239,7 @@ cd /srv
 ```
 
 - Services: `gateway`, `enclave`, `proxy` (nginx), `tunnel` (cloudflared quick tunnel), `web`
-  (placeholder Next.js page).
+  (Next.js message-log dashboard).
 - Dummy agent messages persist in `/srv/data/messages.db` (bind-mounted to `/data` in the gateway),
   so they survive rebuilds. Back it up or delete it freely; there is no migration tooling.
 - No inbound HTTP ports are open; only SSH is allowed by ufw. All public traffic arrives through the

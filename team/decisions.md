@@ -69,3 +69,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Decision: `/risk/link` v0.1 re-derives its score from the redacted `flags` and treats `localSignals` as advisory. The extension therefore sends its own on-device score with each check and shows the worse of the server tier and that score (`extension/src/verdict.ts`, same 80/45 thresholds). A strong local rule (deny list 95, brand impersonation 85, credential harvest 80) can raise the badge; the server tier is never lowered, and a failed check still renders NOT CHECKED, never green.
 - Why: deny-list and brand-impersonation knowledge exists only on-device — the payload has no flag for it — so server-only scoring showed green on a deny-listed Maybank lookalike (local floor 95, server 25). This restores fail-safe behaviour without weakening the server's authority.
 - Affects: Fihkri (extension), Fahreza Alghifari (server rules that overlap the local ones).
+
+## D-011 — 2026-11-19 — Dashboard: read-only message log at the tunnel root
+- Decided by: Fahreza Alghifari (scope agreed with the project owner)
+- Decision: The `web` container now serves a Next.js dashboard (`dashboard/` in the repo) at `/`, replacing the placeholder page. It is read-only: the browser polls `GET /agent/messages?limit=50` every 5 s on the same origin, shows newest-first rows with an expandable raw payload, and has no auth. No new API is added. When the gateway is unreachable it shows the error and keeps the last rows it received — it never shows invented or stale-as-fresh data.
+- Why: gives stored extension messages a visible surface for the demo without widening the API or adding dependencies; the data is dummy logs, so public access is acceptable for now.
+- Affects: Fihkri (messages posted to `/agent/message` appear at the tunnel root), Fahreza Alghifari (dashboard owner)

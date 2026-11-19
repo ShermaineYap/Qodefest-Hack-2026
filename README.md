@@ -217,6 +217,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | Warning interstitial + navigation hook | Scaffolded; needs manual Chrome test |
 | `/risk/link` | Live at the current tunnel host — see `server/README.md` |
 | Agent endpoint | Dummy `POST /agent/message` logs to SQLite on the gateway; Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
+| Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), no auth |
 | Eval set and gate | Not started |
 
 ---
@@ -252,6 +253,7 @@ Qodefest-Hack-2026/
 │       ├── warning/          interstitial + navigation hook
 │       └── panel/            assistant side panel
 ├── server/               gateway + enclave (Python, compose), Ask SHOU (TS)
+├── dashboard/            Next.js message-log dashboard served at /
 ├── eval/                 fixtures, harness, metrics                    [planned]
 └── docs/                 decisions, runbook, eval notes
 ```
