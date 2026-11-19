@@ -1,5 +1,7 @@
 # Qodefest Hack 2026 · Lantern
 
+![Lantern — reads the link before she does](docs/images/banner.svg)
+
 **A browser extension that reads the link before she does — and an agentic chat box that explains what it found.**
 
 Chrome Manifest V3 · TypeScript · on-device redaction · enclave scoring · bounded AI agent
@@ -10,7 +12,7 @@ Team **Pattaya Fried Rice** · williamkee51 · Shermaine Yap · Fahreza Alghifar
 
 ## What we are building
 
-Two surfaces, one detection pipeline:
+Three surfaces, one detection pipeline:
 
 | Surface | What it does |
 |---|---|
@@ -49,19 +51,15 @@ The guard is passive: no copy-pasting, no button to press. The assistant is acti
 
 A clean link gets a badge too. An indicator that appears only on danger is indistinguishable from one that is broken.
 
+![Inline badges in a chat](docs/screenshots/inline-badges.png)
+
+A simulated WhatsApp Web thread served by `npm run sim`; the badges are the real content script's output. The last row arrived after the page had loaded and was annotated by the rescan.
+
 ### Warning page
 
-```
-⚠️  This link may be a scam
+![The warning page naming maybank2u-secure-login.xyz](docs/screenshots/warning-page.png)
 
-It asks for your Maybank login, but it is not maybank.com.my.
-
-    🔴  maybank-secure-login.xyz
-
-Someone you trust can help you check it first.
-
-[  Go back to safety  ]        Continue anyway
-```
+The real warning page, rendered before the link's page is fetched. "Go back to safety" is filled and focused; "Continue anyway" is plain text, never pre-selected.
 
 - **Back is the default and the visually dominant action.** Continue is plain text, never pre-selected, never on a countdown.
 - **Consequences, not mechanics.** "It asks for your bank login, but it is not your bank" beats "brand-token mismatch".
@@ -69,25 +67,9 @@ Someone you trust can help you check it first.
 
 ### Assistant panel
 
-```
-┌──────────────────────────────────────────────────┐
-│  Lantern Assistant                               │
-│                                                  │
-│  You: is this link safe?                         │
-│       maybank-secure-login.xyz/login             │
-│                                                  │
-│  Lantern: 🔴 Likely a scam                       │
-│                                                  │
-│  • The address is not maybank.com.my             │
-│  • The page asks for your bank login             │
-│  • The domain was registered 4 days ago          │
-│                                                  │
-│  What I checked: domain, redirects, age,         │
-│  login form. Request id: req_…                   │
-│                                                  │
-│  [ Go back to safety ]  [ Ask someone I trust ]  │
-└──────────────────────────────────────────────────┘
-```
+<img src="docs/screenshots/panel-verdict.png" alt="The Lantern assistant panel answering a pasted scam message" width="360">
+
+The real side panel answering a pasted message: verdict, reasons, what it checked, what it could not check, one primary action, and the request id.
 
 The panel answers with **evidence**, not prose. Every verdict carries what was checked, what could not be checked, and one primary action. If the backend is unreachable it says **"not checked"**; it never invents a green.
 

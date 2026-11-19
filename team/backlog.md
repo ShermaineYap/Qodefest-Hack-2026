@@ -12,6 +12,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-036 | Confirm your area in `roles.md` as part of the M0 ownership split | done | | | |
 | T-051 | Build the demo deck: 12 slides with three interactive simulations (chat badges, warning page, assistant panel) in `deck/lantern-demo-deck.html`, plus a refreshed README runbook. Renumbered from T-044 (taken by Fihkri in parallel) and restored here after a merge dropped the row | done | | | |
 | T-052 | Deck v2: add agentic-AI and real-time-detection slides, retitle slide 4 to match its three cards, and close on a "test it yourself" slide whose button opens a new click-through bench (`deck/test-links.html`) with the demo runbook linked | done | | | |
+| T-053 | Add visuals to the README: a banner, real inline-badge and warning-page screenshots captured from the sim harness, and a cropped assistant-panel figure | done | | | |
 
 ## Shermaine Yap
 

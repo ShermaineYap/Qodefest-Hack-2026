@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-label="Lantern — a link guard and assistant for older adults">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0f1a"/>
+      <stop offset="1" stop-color="#101a2e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f5a524" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#f5a524" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="360" fill="url(#bg)"/>
+  <circle cx="1000" cy="30" r="280" fill="url(#glow)"/>
+
+  <g transform="translate(64 66)" fill="none" stroke="#f5a524" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="scale(2.6)">
+      <path d="M9 3h6M10 3v3M14 3v3"/>
+      <path d="M7 6h10l-1.2 12.2a2 2 0 0 1-2 1.8h-3.6a2 2 0 0 1-2-1.8L7 6z"/>
+      <path d="M10 14.5c0-1.3 2-1.9 2-3.5 0 1.6 2 2.2 2 3.5a2 2 0 0 1-4 0z"/>
+    </g>
+  </g>
+
+  <text x="146" y="116" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="58" font-weight="700" letter-spacing="-2" fill="#e9eefb">Lantern</text>
+  <text x="66" y="164" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="21" fill="#93a3c4">Reads the link before she does.</text>
+
+  <g font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600">
+    <rect x="66" y="200" width="116" height="32" rx="16" fill="#111a2c" stroke="#22304d"/>
+    <text x="124" y="221" text-anchor="middle" fill="#93a3c4">Chrome MV3</text>
+    <rect x="194" y="200" width="188" height="32" rx="16" fill="#111a2c" stroke="#22304d"/>
+    <text x="288" y="221" text-anchor="middle" fill="#93a3c4">on-device redaction</text>
+    <rect x="394" y="200" width="146" height="32" rx="16" fill="#111a2c" stroke="#22304d"/>
+    <text x="467" y="221" text-anchor="middle" fill="#93a3c4">bounded agent</text>
+  </g>
+
+  <g>
+    <rect x="742" y="58" width="394" height="244" rx="20" fill="#0f1829" stroke="#22304d"/>
+    <text x="774" y="96" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="2" fill="#6b7a99">THE BADGE IN THE CHAT</text>
+
+    <circle cx="782" cy="132" r="7" fill="#34d399"/>
+    <text x="804" y="138" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="16" fill="#e9eefb">Nothing unusual about this link.</text>
+
+    <circle cx="782" cy="184" r="7" fill="#fbbf24"/>
+    <text x="804" y="190" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="16" fill="#e9eefb">This link looks off.</text>
+
+    <circle cx="782" cy="236" r="7" fill="#f87171"/>
+    <text x="804" y="242" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="16" fill="#e9eefb">Do not enter your password.</text>
+
+    <text x="774" y="282" font-family="ui-monospace, Consolas, monospace" font-size="11" fill="#6b7a99">Nothing to press. Nothing to paste.</text>
+  </g>
+
+  <text x="66" y="330" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#6b7a99">Team Pattaya Fried Rice · Qodefest Hack 2026</text>
+</svg>

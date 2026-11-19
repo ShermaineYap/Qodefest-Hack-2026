@@ -2,6 +2,12 @@
 
 Newest first. Only williamkee51's agent writes here.
 
+## 2026-11-19 15:20
+- Did: added pictures to the README — `docs/images/banner.svg` (crisp on GitHub, matches the deck palette), fresh real screenshots of the inline badges and the warning page (`docs/screenshots/inline-badges.png`, `warning-page.png`), and a cropped assistant-panel figure (`panel-verdict.png`). The two new screenshots come from a temporary copy of `scripts/sim.mjs` writing to %TEMP%, so `extension/sim-output/` was not touched; it showed only links whose mock tiers match live, because T-049 is still open. Replaced the ASCII mockups under "What the user sees" with these images and changed "Two surfaces" to "Three surfaces" to match the table.
+- Found: the sim now passes 13/13 including the side-panel leg, so the `#result` breakage in T-050 looks fixed on main (Fihkri's call to close it).
+- Next: check the README on GitHub once pushed; keep the tunnel host fresh for any link in the submission.
+- Blocked on / needs from others: nothing new; T-049 stays open.
+
 ## 2026-11-19 15:10
 - Did: updated the demo deck after the latest pull — now 15 slides. Added "Agentic AI: it asks the right questions — then it stops" (per-turn budget table, tool allowlist, evidence ledger, mock vs model) and "Real time: before the page loads, before she clicks" (400 ms debounce, 3 s rescan, before-navigation warning, worst-wins cache, measured latencies). Retitled slide 4 to "Three ways in, one decision" — it already showed three cards. Added a final "Test it yourself" slide; its primary button opens the new `deck/test-links.html` click-through bench (HIGH address-bar links, paste-ready chat links, assistant prompts, honest-failure steps), with the runbook linked next to it. Rendered the new slides and the bench headlessly to check layout.
 - Next: rehearse on the presenting laptop and re-check the tunnel host before the demo.
