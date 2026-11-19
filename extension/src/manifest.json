@@ -1,17 +1,26 @@
 {
   "manifest_version": 3,
-  "name": "Link Guard",
+  "name": "Lantern",
   "version": "0.1.0",
-  "description": "Reads the link before she does.",
+  "description": "Reads the link before she does, and explains what it found.",
   "minimum_chrome_version": "116",
-  "permissions": ["sidePanel", "webNavigation", "tabs"],
-  "host_permissions": ["https://*.trycloudflare.com/*", "http://localhost:4000/*"],
+  "permissions": [
+    "sidePanel",
+    "webNavigation",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://*.trycloudflare.com/*",
+    "http://localhost:4000/*",
+    "https://*.vercel.app/*",
+    "http://localhost:8787/*"
+  ],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
   "action": {
-    "default_title": "Open Link Guard"
+    "default_title": "Open Lantern"
   },
   "side_panel": {
     "default_path": "panel/panel.html"
@@ -23,7 +32,9 @@
         "https://web.telegram.org/*",
         "https://www.messenger.com/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]

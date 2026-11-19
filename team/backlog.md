@@ -17,6 +17,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | --- | --- | --- | --- | --- | --- |
 | T-037 | Confirm your area in `roles.md` as part of the M0 ownership split | todo | | | |
 | T-039 | Build Ask SHOU v1: bounded check agent, standalone `panel/`, Vercel API, docs and tests (branch `ask-shou`, PR #1) | done | | | |
+| T-041 | Deploy the Lantern Assistant on Vercel as `lantern-assistant` (repo root, `QWEN_API_KEY` env var) so the extension's `ASSISTANT_BASE` resolves | doing | | | |
 
 ## Fahreza Alghifari
 
@@ -24,6 +25,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | --- | --- | --- | --- | --- | --- |
 | T-034 | Implement the backend: API gateway, scoring service, `/risk/link` and agent endpoints; agree the API contract with Fihkri (D-002) | doing | | Fihkri | |
 | T-038 | Decide what runs on the team server and how the backend deploys | done | | | |
+| T-042 | Redeploy the enclave (`./deploy.sh`) to ship the brand/deny-list floors from D-012 | todo | | Shermaine Yap | |
 
 ## Fihkri
 
@@ -31,3 +33,4 @@ Status: `todo` · `doing` · `blocked` · `done`
 | --- | --- | --- | --- | --- | --- |
 | T-033 | Scaffold the Chrome MV3 extension: content script, service worker, URL normaliser, warning page, assistant panel | done | | | |
 | T-040 | Wire the extension service worker to `POST /risk/link` per the contract in `server/README.md` (base URL, `NOT_CHECKED` handling, no green on failure). Ask Fahreza for the current tunnel host; raise CORS/origin needs as a task if `host_permissions` is not enough | done | | Fahreza Alghifari | |
+| T-043 | Reload the extension and smoke-test the side panel: a pasted message goes to the Lantern Assistant; a link shows the badge plus "Ask Lantern Assistant to explain" (D-012) | todo | T-041 | Shermaine Yap | |

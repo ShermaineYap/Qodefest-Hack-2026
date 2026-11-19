@@ -1,4 +1,4 @@
-import type { ScoreStatus, Tier } from '../messages.ts';
+import type { AskStatus, AssistantTier, ScoreStatus, Tier } from '../messages.ts';
 import type { Analysis, RedactedPayload } from '../types.ts';
 import { analyseUrl, extractFirstUrl } from '../link.ts';
 import { buildPayload, previewLines } from '../redact.ts';
@@ -21,6 +21,14 @@ const TIER_CLASS: Record<Tier, string> = {
   high: 'card--high',
 };
 const TIER_LABEL: Record<Tier, string> = { low: 'LOW', medium: 'MEDIUM', high: 'HIGH' };
+const ASSISTANT_CLASS: Record<AssistantTier, string> = {
+  LOW: 'card--low',
+  MEDIUM: 'card--medium',
+  HIGH: 'card--high',
+  NOT_CHECKED: 'card--unknown',
+};
+const ASK_LABEL = 'Ask Lantern Assistant to explain';
+const BM_HINT = /\b(anda|puan|encik|akaun|segera|jangan|sila|wang|pindahkan|bayar|sekarang|hari ini)\b/i;
 
 function requireElement<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -136,7 +144,7 @@ function makeCopyButton(url: string, tier: Tier, headline: string, sentences: st
   button.type = 'button';
 
   button.addEventListener('click', async () => {
-    const summary = `Link Guard: ${TIER_LABEL[tier]} — ${headline}\n${url}\n${sentences.join('\n')}`;
+    const summary = `Lantern: ${TIER_LABEL[tier]} — ${headline}\n${url}\n${sentences.join('\n')}`;
     button.disabled = true;
     try {
       await navigator.clipboard.writeText(summary);
@@ -174,13 +182,82 @@ async function requestScore(payload: RedactedPayload): Promise<ScoreStatus> {
   return { status: 'not_checked', reason: UNREACHABLE_REASON, localSignals: [] };
 }
 
+
+function isAskStatus(value: unknown): value is AskStatus {
+  if (typeof value !== 'object' || value === null || !('status' in value)) return false;
+  const status = (value as { status: unknown }).status;
+  return status === 'answered' || status === 'not_checked';
+}
+
+async function requestAssistant(text: string): Promise<AskStatus> {
+  const locale = BM_HINT.test(text) ? 'ms' : 'en';
+  try {
+    const response: unknown = await chrome.runtime.sendMessage({ type: 'ask', text, locale });
+    if (isAskStatus(response)) return response;
+  } catch {
+    // fall through: fail closed
+  }
+  return { status: 'not_checked', reason: 'The assistant did not answer. Treat this as unverified.' };
+}
+
+function renderAssistant(status: AskStatus, target: HTMLElement): void {
+  if (status.status === 'not_checked') {
+    const card = make('div', 'card card--unknown');
+    card.append(make('h2', 'card__headline', 'Could not check this'));
+    card.append(make('p', 'card__sentence', status.reason));
+    target.replaceChildren(card);
+    return;
+  }
+  const { result } = status;
+  const card = make('div', `card ${ASSISTANT_CLASS[result.tier]}`);
+  card.append(make('p', 'meta', 'Lantern Assistant'));
+  card.append(make('h2', 'card__headline', result.label));
+  if (result.summary) card.append(make('p', 'card__sentence', result.summary));
+  for (const reason of result.reasons) card.append(make('p', 'card__sentence', `• ${reason}`));
+  if (result.checked.length > 0) card.append(make('p', 'meta', `What I checked: ${result.checked.join(', ')}.`));
+  if (result.notChecked.length > 0) card.append(make('p', 'meta', `What I could not check: ${result.notChecked.join('; ')}.`));
+  if (result.action) card.append(make('p', 'card__sentence card__action', `Next step: ${result.action}`));
+  card.append(make('p', 'meta', `Request id: ${result.requestId} · ${result.basis.replace('_', ' ')}`));
+  target.replaceChildren(card);
+}
+
+async function checkMessage(raw: string): Promise<void> {
+  const card = make('div', 'card card--checking');
+  card.append(make('p', 'checking', 'Asking Lantern Assistant…'));
+  resultBox.replaceChildren(card);
+  checkButton.disabled = true;
+  try {
+    renderAssistant(await requestAssistant(raw), resultBox);
+  } finally {
+    checkButton.disabled = false;
+  }
+}
+
+function makeAskButton(raw: string): HTMLButtonElement {
+  const button = make('button', 'button-secondary', ASK_LABEL);
+  button.type = 'button';
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    const slot = make('div');
+    slot.append(make('p', 'checking', 'Asking Lantern Assistant…'));
+    button.replaceWith(slot);
+    renderAssistant(await requestAssistant(raw), slot);
+  });
+  return button;
+}
+
 async function checkLink(): Promise<void> {
   clearError();
 
   const raw = input.value;
   const url = safeExtractUrl(raw);
   if (!url) {
-    setError('Paste a link first. If you pasted a message, make sure it contains a link.');
+    if (raw.trim() === '') {
+      setError('Paste a link or a message first.');
+      return;
+    }
+    // No link in it: a message ("someone asked me for money"). Ask the assistant.
+    await checkMessage(raw);
     return;
   }
 
@@ -207,6 +284,7 @@ async function checkLink(): Promise<void> {
     } else {
       renderNotChecked(status);
     }
+    resultBox.append(makeAskButton(raw));
   } finally {
     checkButton.disabled = false;
   }

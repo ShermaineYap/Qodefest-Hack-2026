@@ -75,3 +75,10 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Decision: The `web` container now serves a Next.js dashboard (`dashboard/` in the repo) at `/`, replacing the placeholder page. It is read-only: the browser polls `GET /agent/messages?limit=50` every 5 s on the same origin, shows newest-first rows with an expandable raw payload, and has no auth. No new API is added. When the gateway is unreachable it shows the error and keeps the last rows it received — it never shows invented or stale-as-fresh data.
 - Why: gives stored extension messages a visible surface for the demo without widening the API or adding dependencies; the data is dummy logs, so public access is acceptable for now.
 - Affects: Fihkri (messages posted to `/agent/message` appear at the tunnel root), Fahreza Alghifari (dashboard owner)
+
+## D-012 — 2026-11-19 — Side panel sends messages to the Lantern Assistant; server mirrors brand and deny-list rules
+- Decided by: Shermaine Yap
+- Decision: (1) The extension side panel checks a pasted **message** (no link) with the Lantern Assistant (`POST /api/agent/chat`, deployed on Vercel), and every link result gets an "Ask Lantern Assistant to explain" button. The call goes through the service worker (`ask` message), so the worker stays the only network surface; `ASSISTANT_BASE` lives in `extension/src/config.ts` next to `API_BASE`. (2) `/risk/link` now derives `deny_list` (95), `brand_impersonation` (85), `credential_harvest` (80), `insecure_login` (60) and `open_redirect` (45) from `host`, `registrable`, `scheme` and `pathShape`, which the payload already carries; tables mirror `extension/src/link.ts`. D-010's on-device floor stays as the second line of defence.
+- Why: the panel previously rejected anything without a link, and the server alone still scored the demo Maybank lookalike LOW.
+- Affects: Fihkri (panel, service worker, manifest renamed to Lantern), Fahreza Alghifari (enclave rules; redeploy with `./deploy.sh`)
+

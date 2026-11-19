@@ -51,3 +51,29 @@ def test_worst_floor_wins() -> None:
 def test_local_signals_do_not_change_the_score() -> None:
     clean = RedactedPayload(v=1, host="example.com", localSignals=["deny_list"])
     assert evaluate(clean)[0] == 0
+
+
+def url_payload(host: str, registrable: str, path: str = "", scheme: str = "https", **flags: bool) -> RedactedPayload:
+    return RedactedPayload(v=1, scheme=scheme, host=host, registrable=registrable, pathShape=path, flags=Flags(**flags))
+
+
+def test_brand_outside_its_domain_is_high() -> None:
+    p = url_payload("maybank-secure-login.xyz", "maybank-secure-login.xyz", "/login", suspiciousTld=True)
+    score, _ = evaluate(p)
+    assert score >= 85
+    assert {"deny_list", "brand_impersonation", "credential_harvest"} <= set(rules(p))
+
+
+def test_brand_lookalike_not_on_deny_list_is_still_high() -> None:
+    p = url_payload("secure.maybank-update.com", "maybank-update.com", "/account")
+    assert evaluate(p)[0] == 85
+
+
+def test_real_brand_domain_has_no_brand_floor() -> None:
+    p = url_payload("www.maybank2u.com.my", "maybank2u.com.my", "/login")
+    assert evaluate(p)[0] == 0
+
+
+def test_insecure_login_floor() -> None:
+    p = url_payload("example.com", "example.com", "/login", scheme="http")
+    assert evaluate(p)[0] == 60

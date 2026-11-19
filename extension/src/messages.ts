@@ -21,7 +21,27 @@ export type ExtensionMessage =
   | { type: 'score'; payload: RedactedPayload; localScore: number }
   | { type: 'get-verdict'; url: string }
   | { type: 'go-back' }
-  | { type: 'continue'; url: string };
+  | { type: 'continue'; url: string }
+  | { type: 'ask'; text: string; locale: 'en' | 'ms' };
+
+export type AssistantTier = 'HIGH' | 'MEDIUM' | 'LOW' | 'NOT_CHECKED';
+
+/** The Lantern Assistant's verdict, trimmed to what the panel renders. */
+export interface AssistantResult {
+  requestId: string;
+  tier: AssistantTier;
+  label: string;
+  summary: string;
+  reasons: string[];
+  checked: string[];
+  notChecked: string[];
+  action: string | null;
+  basis: string;
+}
+
+export type AskStatus =
+  | { status: 'answered'; result: AssistantResult }
+  | { status: 'not_checked'; reason: string };
 
 export const TIER_RANK: Record<Tier, number> = { low: 0, medium: 1, high: 2 };
 

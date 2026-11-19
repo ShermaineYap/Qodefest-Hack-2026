@@ -107,13 +107,22 @@ Tier thresholds (current): `score >= 80` → high, `45–79` → medium, `< 45` 
 
 Implemented deterministic rules (floor = minimum score; worst floor wins):
 
-| Rule | Floor | Trigger (payload flag) |
+| Rule | Floor | Trigger |
 |---|---|---|
+| `deny_list` | 95 | `registrable` or `host` on the deny list (mirrors `extension/src/link.ts`) |
+| `brand_impersonation` | 85 | a brand token (Maybank, CIMB, Shopee, LHDN…) in `host` but `registrable` is not that brand's domain |
+| `credential_harvest` | 80 | brand impersonation + `pathShape` is `/login`, `/verify` or `/account` |
 | `lookalike_characters` | 80 | `punycode`, `mixedScript` or `homoglyph` |
 | `userinfo_obfuscation` | 70 | `userinfo` |
 | `ip_literal` | 60 | `ipLiteral` |
+| `insecure_login` | 60 | `scheme` is `http` + a sign-in `pathShape` |
 | `shortener` | 45 | `shortener` |
+| `open_redirect` | 45 | `openRedirect` |
 | `suspicious_tld` | 25 | `suspiciousTld` |
+
+`sentences` now name the rules that fired (for example "The address mentions Maybank, but Maybank's real address is maybank.com.my."), followed by one action sentence.
+
+The extension also applies its own on-device floors to the server verdict (worst verdict wins), so a stale server can never show a known-bad link as green.
 
 ### `GET /health`
 
