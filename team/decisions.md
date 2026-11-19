@@ -94,3 +94,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Why: the gateway already hosts a model-backed check on the live tunnel, so the extension needs no second deployment.
 - Affects: Fihkri (panel and service worker), Fahreza Alghifari (`/agent/message` is now called by the extension; replies are English in mock mode)
 
+## D-015 — 2026-11-19 — `/agent/message` labels scams new vs known from the message log
+- Decided by: Fahreza Alghifari
+- Decision: `POST /agent/message` fingerprints each message (SHA-256 of the lower-cased, whitespace-collapsed text; the URL when text is empty) and looks it up in the gateway's `messages` table. A `scam` verdict with no stored scam fingerprint gets `scam_status: "new_scam"`; a match to an earlier stored scam gets `"known_scam"` plus `first_seen_id`, `first_seen_at` and a plain-language `scam_note` ("This is a new scam…" / "This is a known scam: we first recorded it on …"). `not_scam` and `unsure` return `scam_status: null`. A repeat of a stored scam is always returned as `status: "scam"` even if the model is unsure or says `not_scam` that day, so known repeats cannot regress to green. Rows stored before this change are fingerprinted at startup; matching is exact after normalization (no fuzzy or partial matching yet). `status`, `reply` and `reasons` keep their existing meaning; `GET /agent/messages` and the dashboard expose the new fields.
+- Why: the demo and dashboard need to say whether a scam is new to us or one we have already seen, and an exact repeat of a confirmed scam must not be downgraded by model variance.
+- Affects: Fahreza Alghifari (gateway, SQLite schema, dashboard), Fihkri / Shermaine (clients may display `scam_status` / `scam_note`; existing `status` parsing is unchanged)
+

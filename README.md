@@ -216,7 +216,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | URL normaliser + deterministic rules | Done (extension on-device; server re-derives from flags) |
 | Warning interstitial + navigation hook | Scaffolded; needs manual Chrome test |
 | `/risk/link` | Live at the current tunnel host — see `server/README.md` |
-| Agent endpoint | `POST /agent/message` on the gateway checks text and/or a screenshot with an OpenAI-compatible model and returns `scam` \| `not_scam` \| `unsure` + reply; stored in SQLite; keyword mock until `LLM_API_KEY` is set. Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
+| Agent endpoint | `POST /agent/message` on the gateway checks text and/or a screenshot with an OpenAI-compatible model and returns `scam` \| `not_scam` \| `unsure` + reply; it also fingerprints the message against the stored log and labels a scam `new_scam` or `known_scam` (with the first-seen time); stored in SQLite; keyword mock until `LLM_API_KEY` is set. Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
 | Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), Beautiful UI primitives, no auth |
 | Eval set and gate | Not started |
 

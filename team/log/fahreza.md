@@ -2,6 +2,11 @@
 
 Newest first. Only Fahreza's agent writes here.
 
+## 2026-11-19 06:16
+- Did: Added the new-vs-known scam check to `POST /agent/message` (D-015). Each message is fingerprinted (SHA-256 of lower-cased, whitespace-collapsed text; URL when text is empty) and looked up in SQLite; scams return `scam_status: "new_scam" | "known_scam"`, a plain-language `scam_note`, and `first_seen_id` / `first_seen_at` for repeats. Exact repeats of a stored scam stay `scam` even if the model is weaker that day; `not_scam` / `unsure` return `scam_status: null`. Schema columns are migrated in place and existing rows are fingerprinted at startup. `GET /agent/messages` returns the new fields; the dashboard shows a New/Known scam pill and the note in the expanded row. Updated `server/README.md` and the root status table. Gateway tests: 16 pass.
+- Next: redeploy the gateway to the team server for T-042's enclave work, then verify the tunneled endpoint with a first and repeat scam message.
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 05:58
 - Did: Turned `POST /agent/message` into a real check (D-013): text and/or screenshot goes to an OpenAI-compatible model, which returns `status` scam | not_scam | unsure, `reply`, `reasons`, `model`; the verdict is stored in SQLite via in-place column migration. Fail-closed `503 agent_unavailable` on model errors or unusable output, and nothing is stored. Screenshots accepted as png/jpeg/webp data URLs and never stored. Deterministic keyword mock runs when no key. 9 gateway tests pass. Dashboard rows now show a status pill and reply, with reasons/model in the expanded panel. Updated `server/README.md` and compose env.
 - Next: set `LLM_API_KEY` in `/srv/.env` and redeploy to leave mock mode; then settle with Fihkri/Shermaine which client path calls this endpoint (`/agent/message` here vs the separate Ask SHOU `/api/agent/chat`).

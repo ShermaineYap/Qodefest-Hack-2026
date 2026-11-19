@@ -69,6 +69,7 @@ class AgentMessage(BaseModel):
 
 
 AnalysisStatus = Literal["scam", "not_scam", "unsure"]
+ScamStatus = Literal["new_scam", "known_scam"]
 
 
 class Analysis(BaseModel):
@@ -86,4 +87,8 @@ class StoredMessage(BaseModel):
     reply: str = ""
     reasons: list[str] = Field(default_factory=list)
     model: str = ""
+    scam_status: ScamStatus | None = None
+    scam_note: str = ""
+    first_seen_id: int | None = None
+    first_seen_at: str | None = None
 

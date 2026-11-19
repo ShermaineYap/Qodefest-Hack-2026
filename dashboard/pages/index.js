@@ -26,6 +26,11 @@ const STATUS_META = {
   unsure: { tone: "orange", label: "Not sure" },
 };
 
+const SCAM_STATUS_META = {
+  new_scam: { tone: "red", label: "New scam" },
+  known_scam: { tone: "orange", label: "Known scam" },
+};
+
 const CLIENT_COLORS = ["#5b8def", "#e08a3c", "#25a878", "#a06de0", "#d0568b"];
 
 function clientColor(name) {
@@ -270,6 +275,7 @@ export default function Dashboard() {
                 {visible.map((message) => {
                   const meta = kindMeta(message.kind);
                   const statusInfo = STATUS_META[message.status];
+                  const scamStatusInfo = SCAM_STATUS_META[message.scam_status];
                   const expanded = expandedId === message.id;
                   const payloadText = JSON.stringify(message.payload, null, 2);
                   return (
@@ -363,11 +369,21 @@ export default function Dashboard() {
                                 ) : (
                                   <StatusPill tone="neutral">No verdict</StatusPill>
                                 )}
+                                {scamStatusInfo && (
+                                  <StatusPill tone={scamStatusInfo.tone}>
+                                    {scamStatusInfo.label}
+                                  </StatusPill>
+                                )}
                                 {message.model && <Chip>{message.model}</Chip>}
                               </div>
                               {message.reply && (
                                 <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
                                   {message.reply}
+                                </p>
+                              )}
+                              {message.scam_note && (
+                                <p className="mt-2 text-[12px] leading-relaxed text-ink-3">
+                                  {message.scam_note}
                                 </p>
                               )}
                               {(message.reasons ?? []).length > 0 && (

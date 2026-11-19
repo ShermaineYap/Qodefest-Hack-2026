@@ -42,8 +42,9 @@ async def risk_link(payload: RedactedPayload) -> Verdict:
         raise HTTPException(status_code=503, detail="enclave_unavailable")
 
 
-# Message check: one model call (text or screenshot), stored with its verdict.
-# Fail-closed: if the model is unreachable the client gets 503, not a made-up answer.
+# Message check: one model call (text or screenshot), then a fingerprint lookup against stored
+# scams to label the verdict new_scam or known_scam. Fail-closed: if the model is unreachable
+# the client gets 503, not a made-up answer.
 @app.post("/agent/message", response_model=StoredMessage, status_code=201)
 async def agent_message(message: AgentMessage) -> StoredMessage:
     try:

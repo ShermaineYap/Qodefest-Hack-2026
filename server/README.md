@@ -131,8 +131,9 @@ The extension also applies its own on-device floors to the server verdict (worst
 ### `POST /agent/message`
 
 Accepts one message from the extension (text and/or a screenshot), asks the configured model
-whether it looks like a scam, stores the message with the verdict, and returns the verdict and
-reply in the same call.
+whether it looks like a scam, then cross-checks the message against the stored message log. A scam
+is labelled `new_scam` the first time it appears and `known_scam` when the same message was already
+stored with a `scam` verdict. The verdict, novelty label and reply come back in the same call.
 
 Request (all fields optional; unknown fields are kept in the stored payload):
 
@@ -156,12 +157,16 @@ Response `201`:
 
 ```json
 {
-  "id": 1,
-  "received_at": "2026-11-19T05:44:53+00:00",
+  "id": 2,
+  "received_at": "2026-11-19T06:10:02+00:00",
   "status": "scam",
   "reply": "This has clear signs of a scam. Don't reply, don't click any links, and don't share passwords, OTPs or bank details.",
   "reasons": ["mentions 'otp'", "asks for a payment", "mentions 'click'"],
-  "model": "qwen-plus"
+  "model": "qwen-plus",
+  "scam_status": "known_scam",
+  "scam_note": "This is a known scam: we first recorded it on 2026-11-19T05:44:53+00:00.",
+  "first_seen_id": 1,
+  "first_seen_at": "2026-11-19T05:44:53+00:00"
 }
 ```
 
@@ -170,6 +175,18 @@ Response `201`:
 | `scam` | Clear scam signals | Treat as dangerous; one primary action (go back / don't reply) |
 | `not_scam` | No scam signals found — never "guaranteed safe" | Stay careful anyway |
 | `unsure` | Not enough evidence, or the answer was unusable | Verify the sender elsewhere |
+
+| `scam_status` | Meaning |
+|---|---|
+| `new_scam` | The verdict is `scam` and no stored scam has the same fingerprint |
+| `known_scam` | A message with the same fingerprint was already stored with a `scam` verdict; `first_seen_id` / `first_seen_at` point at the first report and `scam_note` names its date |
+| `null` | The verdict is `not_scam` or `unsure` — `scam_note` is empty |
+
+The fingerprint is the SHA-256 of the message text, lower-cased with runs of whitespace collapsed;
+for a message with no text it is the same normalization of `url`. Matching is exact after
+normalization (no fuzzy or partial matching yet), and rows stored before fingerprinting existed are
+backfilled at startup. A repeat of a stored scam is returned as `status: "scam"` even if the model
+is unsure or says `not_scam` that day, so known repeat scams cannot regress to green.
 
 Fail-closed: if the model is unreachable, times out (`AGENT_TIMEOUT`, default 20 s) or returns
 unusable output, the gateway answers **`503`** (`{"detail": "agent_unavailable"}`) and stores
@@ -200,13 +217,18 @@ stored payload (with the image reduced to `{mime, chars}`) and its analysis:
     "reply": "This has clear signs of a scam. …",
     "reasons": ["mentions 'otp'"],
     "model": "qwen-plus",
+    "scam_status": "known_scam",
+    "scam_note": "This is a known scam: we first recorded it on 2026-11-19T05:44:53+00:00.",
+    "first_seen_id": 1,
+    "first_seen_at": "2026-11-19T05:44:53+00:00",
     "payload": { "v": 1, "client": "extension", "kind": "chat", "text": "…", "url": "…", "ts": "…" }
   }
 ]
 ```
 
 Storage is a single SQLite table (`messages`: `id`, `received_at`, `client`, `kind`, `text`, `url`,
-`payload`, `status`, `reply`, `reasons`, `model`). The file lives on the host at `/srv/data/`
+`payload`, `status`, `reply`, `reasons`, `model`, `fingerprint`, `scam_status`, `scam_note`,
+`first_seen_id`, `first_seen_at`). The file lives on the host at `/srv/data/`
 (bind-mounted to `/data` in the gateway container), so it survives rebuilds. Columns added after the
 first deploy are migrated in place at startup; see D-009 and D-013.
 
@@ -234,6 +256,9 @@ see `dashboard/THIRD_PARTY_NOTICES.md`).
 - **Agent conversation.** `/agent/message` is one model call per message: no streaming, no multi-turn
   history, no tools, no follow-up chips. The separate Ask SHOU agent API (`docs/ask-shou-api.md`,
   `server/index.ts`, :8787/Vercel) is still not part of this compose stack.
+- **Fuzzy scam matching.** New-vs-known compares the exact normalized text (or URL when text is
+  empty). A reworded or partly edited repeat counts as a new scam; there is no fuzzy hash, shared
+  threat feed or cross-host cache yet.
 - **Auth / rate limits on the message endpoint.** None yet; anyone with the tunnel URL can spend
   model tokens. Add a shared secret and rate limit before publicising the host.
 - **Deny-list, brand-token, domain-age, redirect rules.** Only the five flag-based rules above exist.
