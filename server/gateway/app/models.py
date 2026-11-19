@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 Tier = Literal["low", "medium", "high"]
 
@@ -45,3 +45,20 @@ class Verdict(BaseModel):
     category: str | None = None
     held_for_review: bool = False
     checks: list[Check] = Field(default_factory=list)
+
+
+class AgentMessage(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    v: int = 1
+    client: str = ""
+    kind: str = ""
+    text: str = Field(default="", max_length=8000)
+    url: str = Field(default="", max_length=2048)
+    ts: str = ""
+
+
+class StoredMessage(BaseModel):
+    id: int
+    received_at: str
+

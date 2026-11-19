@@ -216,7 +216,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | URL normaliser + deterministic rules | Done (extension on-device; server re-derives from flags) |
 | Warning interstitial + navigation hook | Scaffolded; needs manual Chrome test |
 | `/risk/link` | Live at the current tunnel host — see `server/README.md` |
-| Agent endpoint | Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
+| Agent endpoint | Dummy `POST /agent/message` logs to SQLite on the gateway; Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
 | Eval set and gate | Not started |
 
 ---

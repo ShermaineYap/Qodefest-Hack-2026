@@ -8,7 +8,7 @@ anything.
 
 | Process | Port | Reachable from | Role |
 |---|---|---|---|
-| `gateway` | 4000 | public (via proxy/tunnel) | transport only: validates the request, calls the enclave, returns the verdict. No text, no verdicts of its own. |
+| `gateway` | 4000 | public (via proxy/tunnel) | validates requests, calls the enclave, returns the verdict; also stores dummy `/agent/message` logs in SQLite. No verdicts of its own. |
 | `enclave` | 3100 | compose network only | scoring: deterministic flag-based rules now; models later. |
 
 ```
@@ -119,6 +119,55 @@ Implemented deterministic rules (floor = minimum score; worst floor wins):
 
 `{"status": "ok"}` — gateway liveness only.
 
+### `POST /agent/message`
+
+**Dummy endpoint, no agent yet.** Stores one message from the extension (or curl) in SQLite
+(`/srv/data/messages.db` on the team server) and returns its log id. It does not call a model and
+does not answer; the real agent endpoint will replace this behaviour.
+
+Request (all fields optional; unknown fields are kept in the stored payload):
+
+```json
+{
+  "v": 1,
+  "client": "extension",
+  "kind": "chat",
+  "text": "why does this site ask for my IC number?",
+  "url": "https://example.com/login",
+  "ts": "2026-11-19T06:00:00Z"
+}
+```
+
+Limits: `text` ≤ 8000 chars, `url` ≤ 2048 chars. Response `201`:
+
+```json
+{ "id": 1, "received_at": "2026-11-19T05:44:53+00:00" }
+```
+
+### `GET /agent/messages`
+
+Read back what was stored, newest first. `?limit=` 1–100 (default 20). Each row includes the full
+stored payload:
+
+```json
+[
+  {
+    "id": 1,
+    "received_at": "2026-11-19T05:44:53+00:00",
+    "client": "extension",
+    "kind": "chat",
+    "text": "why does this site ask for my IC number?",
+    "url": "https://example.com/login",
+    "payload": { "v": 1, "client": "extension", "kind": "chat", "text": "…", "url": "…", "ts": "…" }
+  }
+]
+```
+
+Storage is a single SQLite table (`messages`: `id`, `received_at`, `client`, `kind`, `text`, `url`,
+`payload` as JSON). The file lives on the host at `/srv/data/` (bind-mounted to `/data` in the
+gateway container), so it survives rebuilds. This is deliberately temporary; see D-009.
+
+
 ### `GET /api/ping`
 
 Returns `ping` as text. Temporary connectivity check while the extension is unwired; will be removed
@@ -129,10 +178,11 @@ once `/risk/link` is in real use. Do not build product behaviour on it.
 - **Server-side re-redaction.** The payload is already redacted by the extension; the enclave does
   not currently strip anything else from `host`/`pathShape`.
 - **Models / verifier.** No classifier, no cross-verification, no MEDIUM "held for review" logic.
-- **`POST /agent`.** The assistant/agent endpoint does not exist on this service. Any `/agent*` path
-  currently 404s at the gateway (routed there, but no handler). The separate Ask SHOU agent API is
-  described in `docs/ask-shou-api.md` and served by `server/index.ts` (local :8787, Vercel in
+- **A real agent endpoint.** `POST /agent/message` only stores messages in SQLite and returns the log
+  id — it does not answer. Any other `/agent*` path 404s at the gateway. The separate Ask SHOU agent
+  API is described in `docs/ask-shou-api.md` and served by `server/index.ts` (local :8787, Vercel in
   production) — it is not part of this compose stack yet. Contract will be agreed before M2.
+- **Database beyond message logging.** One SQLite table, no migrations; no auth on `GET /agent/messages`.
 - **Deny-list, brand-token, domain-age, redirect rules.** Only the five flag-based rules above exist.
 - **CORS / origin allow-list.** No CORS headers are configured. A Manifest V3 service worker calling
   this host with `host_permissions: ["https://<tunnel-host>/*"]` does not need CORS; if the
@@ -164,6 +214,14 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
+Gateway tests (message logging, in-memory FastAPI client):
+
+```bash
+cd server/gateway
+pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest
+```
+
 ## Deployment (team server 172.104.41.120)
 
 Compose project `app` lives in `/srv`; the repo is cloned at `/srv/repo`.
@@ -176,6 +234,8 @@ cd /srv
 
 - Services: `gateway`, `enclave`, `proxy` (nginx), `tunnel` (cloudflared quick tunnel), `web`
   (placeholder Next.js page).
+- Dummy agent messages persist in `/srv/data/messages.db` (bind-mounted to `/data` in the gateway),
+  so they survive rebuilds. Back it up or delete it freely; there is no migration tooling.
 - No inbound HTTP ports are open; only SSH is allowed by ufw. All public traffic arrives through the
   outbound quick tunnel.
 - The quick-tunnel hostname is **ephemeral** and changes whenever `app-tunnel-1` restarts. Get it:
@@ -216,6 +276,12 @@ curl -s -X POST -H 'Content-Type: application/json' \
 
 curl -s -o /dev/null -w '%{http_code}\n' "$BASE/score"
 # -> 404: the enclave is not publicly routed
+
+# Dummy agent log: store one message, then read it back
+curl -s -X POST -H 'Content-Type: application/json' \
+  -d '{"v":1,"client":"curl","kind":"chat","text":"hello"}' "$BASE/agent/message"
+# -> {"id":1,"received_at":"..."}
+curl -s "$BASE/agent/messages?limit=5"
 ```
 
 ## Layout
@@ -224,12 +290,15 @@ curl -s -o /dev/null -w '%{http_code}\n' "$BASE/score"
 server/
 ├── gateway/
 │   ├── app/
-│   │   ├── main.py       routes: /health, /api/ping, /risk/link
+│   │   ├── main.py       routes: /health, /api/ping, /risk/link, /agent/message, /agent/messages
 │   │   ├── client.py     enclave client (HTTP, 8s timeout, fail-closed)
-│   │   ├── models.py     redacted payload + verdict models
-│   │   └── config.py     ENCLAVE_URL, ENCLAVE_TIMEOUT env vars
+│   │   ├── db.py         SQLite message log (init, insert, list)
+│   │   ├── models.py     redacted payload + verdict + agent message models
+│   │   └── config.py     ENCLAVE_URL, ENCLAVE_TIMEOUT, DB_PATH env vars
+│   ├── tests/            pytest: message logging
 │   ├── Dockerfile
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── requirements-dev.txt
 └── enclave/
     ├── app/
     │   ├── main.py       routes: /health, /score
