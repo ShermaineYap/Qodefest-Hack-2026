@@ -45,3 +45,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Decision: the product is called **Lantern**, replacing "Link Guard". The panel is the **Lantern Assistant**; "passive link guard" stays as the feature description.
 - Why: Lantern carries light into what a link or page is really doing — protection plus an agent to ask about hidden or unclear features — without the fear framing of "guard".
 - Affects: everyone — use "Lantern" in the UI, docs, pitch and repo references.
+
+## D-007 — 2026-11-19 — Backend deployment: Docker Compose + gateway/enclave split
+- Decided by: Fahreza Alghifari
+- Decision: Backend deploys as two FastAPI services via Docker Compose on the team server (172.104.41.120): `gateway` on :4000 (the only public surface) and `enclave` on :3100 (compose network only, never routed). An internal nginx routes `/risk/*`, `/agent*`, `/health`, `/api/ping` to the gateway; public traffic arrives through a Cloudflare quick tunnel, so no inbound HTTP ports are open (ufw allows SSH only). Code lives in `server/`; the contract and deployment runbook are in `server/README.md`. The extension calls `${BASE}/risk/link` — spec paths unchanged.
+- Why: matches the README architecture (gateway transport-only, enclave isolated), keeps scoring off the public internet, and needs no firewall exposure while the hostname is still a quick tunnel.
+- Affects: Fihkri (extension base URL + T-040), Fahreza Alghifari (deploys)
