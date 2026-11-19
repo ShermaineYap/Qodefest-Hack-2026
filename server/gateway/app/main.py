@@ -1,9 +1,7 @@
-import os
-import secrets
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 
 from app.agent import AgentUnavailable, analyze
@@ -71,16 +69,7 @@ def agent_messages(limit: int = Query(20, ge=1, le=100)) -> list[dict]:
 
 
 # Admin console: natural-language questions over the same message log. The
-# endpoint stays inside the gateway's /agent proxy prefix, and is disabled
-# outright until ADMIN_TOKEN is set on the server.
+# endpoint stays inside the gateway's /agent proxy prefix.
 @app.post("/agent/admin/chat", response_model=AdminAnswer)
-async def agent_admin_chat(
-    body: AdminQuestion,
-    x_admin_token: str = Header(default=""),
-) -> AdminAnswer:
-    expected = os.environ.get("ADMIN_TOKEN", "")
-    if not expected:
-        raise HTTPException(status_code=503, detail="admin_disabled")
-    if not secrets.compare_digest(x_admin_token, expected):
-        raise HTTPException(status_code=401, detail="admin_token_required")
+async def agent_admin_chat(body: AdminQuestion) -> AdminAnswer:
     return await admin_chat(settings.db_path, body)

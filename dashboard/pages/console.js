@@ -8,7 +8,6 @@ import { Chip } from "@/components/beautiful-ui/Chip";
 import { StatusPill } from "@/components/beautiful-ui/StatusPill";
 
 const API_BASE = process.env.NEXT_PUBLIC_GATEWAY_BASE ?? "";
-const TOKEN_KEY = "lantern.adminToken";
 const MAX_RENDERED_ROWS = 20;
 
 const SUGGESTIONS = [
@@ -19,11 +18,7 @@ const SUGGESTIONS = [
   "What did people ask yesterday?",
 ];
 
-function adminError(status, detail) {
-  if (status === 401) return "That admin token was rejected. Paste the server's ADMIN_TOKEN and try again.";
-  if (status === 503 || detail === "admin_disabled") {
-    return "The admin console is switched off on the server: ADMIN_TOKEN is not set.";
-  }
+function adminError(status) {
   if (status === 422) return "The gateway rejected that question. Keep it under 500 characters.";
   return `The gateway answered ${status}. Nothing was invented; try again.`;
 }
@@ -127,42 +122,19 @@ function Answer({ turn }) {
 }
 
 export default function Console() {
-  const [token, setToken] = useState("");
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState([]);
   const [busy, setBusy] = useState(false);
   const endRef = useRef(null);
 
   useEffect(() => {
-    setToken(window.sessionStorage.getItem(TOKEN_KEY) ?? "");
-  }, []);
-
-  useEffect(() => {
     if (endRef.current) endRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turns]);
-
-  const rememberToken = useCallback((value) => {
-    setToken(value);
-    window.sessionStorage.setItem(TOKEN_KEY, value);
-  }, []);
 
   const send = useCallback(
     async (raw) => {
       const text = String(raw ?? question).trim();
       if (!text || busy) return;
-      if (!token.trim()) {
-        setTurns((prev) => [
-          ...prev,
-          { id: `${Date.now()}-u`, role: "user", content: text },
-          {
-            id: `${Date.now()}-e`,
-            role: "assistant",
-            error: "Enter the admin token above first. The server refuses the question without it.",
-          },
-        ]);
-        setQuestion("");
-        return;
-      }
 
       const history = [];
       for (const turn of turns) {
@@ -185,15 +157,12 @@ export default function Console() {
         const response = await fetch(`${API_BASE}/agent/admin/chat`, {
           method: "POST",
           cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Admin-Token": token.trim(),
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: text, history: history.slice(-6) }),
         });
         const body = await response.json().catch(() => null);
         if (!response.ok) {
-          throw new Error(adminError(response.status, body?.detail));
+          throw new Error(adminError(response.status));
         }
         setTurns((prev) =>
           prev.map((turn) => (turn.id === id ? { id, role: "assistant", ...body } : turn)),
@@ -217,7 +186,7 @@ export default function Console() {
         setBusy(false);
       }
     },
-    [busy, question, token, turns],
+    [busy, question, turns],
   );
 
   const onSubmit = (event) => {
@@ -254,26 +223,6 @@ export default function Console() {
               Back to the log
             </a>
           </header>
-
-          <section aria-label="Admin token" className="mt-5 rounded-card bg-surface p-4 shadow-card">
-            <div className="flex flex-wrap items-end gap-3">
-              <label className="flex min-w-60 flex-1 flex-col gap-1.5 text-[13px] font-medium text-ink-2">
-                Admin token
-                <input
-                  type="password"
-                  value={token}
-                  onChange={(event) => rememberToken(event.target.value)}
-                  placeholder="Paste ADMIN_TOKEN from the server"
-                  autoComplete="off"
-                  spellCheck={false}
-                  className="h-11 rounded-control border border-line bg-surface px-3 font-mono text-[13px] text-ink outline-none transition-shadow focus:ring-2 focus:ring-accent focus:ring-offset-2"
-                />
-              </label>
-              <p className="pb-2.5 text-[12px] text-ink-3">
-                Kept in this tab only. The gateway refuses every question without it.
-              </p>
-            </div>
-          </section>
 
           <section aria-live="polite" className="mt-5 flex flex-1 flex-col gap-4">
             {turns.length === 0 ? (

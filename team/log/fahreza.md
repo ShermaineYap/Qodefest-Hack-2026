@@ -2,6 +2,11 @@
 
 Newest first. Only Fahreza's agent writes here.
 
+## 2026-11-19 06:38
+- Did: Removed the admin token gate at the admin's request (D-018 supersedes D-017's auth part). `POST /agent/admin/chat` and `/console` are open to anyone with the tunnel URL; the token field, `sessionStorage`, `X-Admin-Token` header and 401/503 states are gone, and `ADMIN_TOKEN` is out of `/srv/.env` and `docker-compose.yml`. The read-only SQL guardrails and summary fallback are unchanged. Tests updated (auth cases dropped), build passed, rebuilt and redeployed; `/console` and the open endpoint verified through the tunnel.
+- Next: keep `/console` verified before the demo; add auth/rate limits if the host is ever publicised.
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 06:25
 - Did: Added the admin console (D-017). `POST /agent/admin/chat` takes `{question, history}` and answers over the `messages` table: the model plans one SQLite `SELECT`, the gateway enforces a single read-only statement (mode=ro, query_only, table authorizer, 200-row cap, 3 s deadline) and summarises the rows; with no `LLM_API_KEY` or a rejected query it returns a deterministic count summary labelled `source: "summary"`. Requires `X-Admin-Token` = `ADMIN_TOKEN` (503 when unset, 401 otherwise). New dashboard page `/console` ("Ask the log" on `/`) keeps the token in sessionStorage and shows the answer, the SQL and the rows. 38 gateway tests pass (12 new); Next build passes; HTTP smoke test through a local gateway returned the expected summary and 401.
 - Next: set `ADMIN_TOKEN` in `/srv/.env` + gateway environment and rebuild to make `/console` live; push the branch.

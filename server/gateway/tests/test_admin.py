@@ -11,12 +11,9 @@ from app.config import settings
 from app.db import connect, init_db
 from app.insights import QueryRejected, run_readonly, validate_sql
 
-TOKEN = "test-admin-token"
-
 
 @pytest.fixture
 def app_client(tmp_path, monkeypatch):
-    monkeypatch.setenv("ADMIN_TOKEN", TOKEN)
     monkeypatch.setenv("LLM_API_KEY", "")
     monkeypatch.setenv("QWEN_API_KEY", "")
     test_settings = dataclasses.replace(settings, db_path=str(tmp_path / "messages.db"))
@@ -25,11 +22,10 @@ def app_client(tmp_path, monkeypatch):
         yield client, test_settings.db_path
 
 
-def ask(client, question, token=TOKEN, history=None):
+def ask(client, question, history=None):
     return client.post(
         "/agent/admin/chat",
         json={"question": question, "history": history or []},
-        headers={"X-Admin-Token": token},
     )
 
 
@@ -47,20 +43,6 @@ def seed(db_path, rows):
 def now_minus(days=0):
     stamp = datetime.now(timezone.utc) - timedelta(days=days)
     return stamp.isoformat(timespec="seconds")
-
-
-def test_disabled_without_admin_token(app_client, monkeypatch):
-    client, _ = app_client
-    monkeypatch.delenv("ADMIN_TOKEN", raising=False)
-    response = ask(client, "what happened today?")
-    assert response.status_code == 503
-    assert response.json() == {"detail": "admin_disabled"}
-
-
-def test_rejects_missing_and_wrong_token(app_client):
-    client, _ = app_client
-    assert ask(client, "what happened today?", token="").status_code == 401
-    assert ask(client, "what happened today?", token="nope").status_code == 401
 
 
 def test_summary_counts_today(app_client):
