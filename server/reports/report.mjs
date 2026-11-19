@@ -261,6 +261,7 @@ async function main() {
     `report: wrote ${target} (rows=${rows.length}, scam=${summary.counts.scam}, ` +
       `not_scam=${summary.counts.not_scam}, unsure=${summary.counts.unsure}, model=${MODEL})`,
   );
+  process.exit(0);
 }
 
 main().catch((error) => {
