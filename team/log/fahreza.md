@@ -2,6 +2,11 @@
 
 Newest first. Only Fahreza's agent writes here.
 
+## 2026-11-19 06:42
+- Did: Put the daily reports on the dashboard (D-019, supersedes D-015's server-only clause). `/reports` lists `/srv/reports` and renders the selected Markdown; `web` mounts `./reports:/reports:ro` and two Next API routes validate the date, read one file, cap it at 512 KB and set `no-store`. Rendering is `react-markdown` + `remark-gfm` without raw HTML. Added a "Reports" link to `/`. Verified through the tunnel: `/reports` 200 with the expected header, `GET /api/reports` lists 2026-11-19 (1665 B), `GET /api/reports/2026-11-19` returns the Markdown, invalid/missing dates 404, URL-encoded traversal 400, mount `rw=false`. No browser binary on the host, so verification was HTTP-level only.
+- Next: open `/reports` once in a real browser to check the Markdown typography and dark theme before the demo.
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 06:38
 - Did: Removed the admin token gate at the admin's request (D-018 supersedes D-017's auth part). `POST /agent/admin/chat` and `/console` are open to anyone with the tunnel URL; the token field, `sessionStorage`, `X-Admin-Token` header and 401/503 states are gone, and `ADMIN_TOKEN` is out of `/srv/.env` and `docker-compose.yml`. The read-only SQL guardrails and summary fallback are unchanged. Tests updated (auth cases dropped), build passed, rebuilt and redeployed; `/console` and the open endpoint verified through the tunnel.
 - Next: keep `/console` verified before the demo; add auth/rate limits if the host is ever publicised.

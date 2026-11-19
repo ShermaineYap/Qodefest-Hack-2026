@@ -166,6 +166,9 @@ export default function Dashboard() {
               <StatusPill tone={status === "error" ? "red" : status === "ok" ? "green" : "neutral"}>
                 {status === "error" ? "Gateway unreachable" : status === "ok" ? "Gateway ok" : "Connecting"}
               </StatusPill>
+              <a href="/reports" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+                Reports
+              </a>
               <a href="/console" className={buttonVariants({ variant: "secondary", size: "sm" })}>
                 Ask the log
               </a>

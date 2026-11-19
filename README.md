@@ -219,7 +219,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | Agent endpoint | `POST /agent/message` on the gateway checks text and/or a screenshot with an OpenAI-compatible model and returns `scam` \| `not_scam` \| `unsure` + reply; it also fingerprints the message against the stored log and labels a scam `new_scam` or `known_scam` (with the first-seen time); stored in SQLite; keyword mock until `LLM_API_KEY` is set. Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
 | Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), Beautiful UI primitives, no auth |
 | Admin console | `/console` in the dashboard: chat over the stored log ("what happened today?"), one read-only SQL query per question with a deterministic count summary when the model is unavailable |
-| Daily scam report | Qoder Agent SDK job in `server/reports/`, cron 23:30 MYT, writes `/srv/reports/YYYY-MM-DD.md` on the server only (needs `QODER_PERSONAL_ACCESS_TOKEN`) |
+| Daily scam report | Qoder Agent SDK job in `server/reports/`, cron 23:30 MYT, writes `/srv/reports/YYYY-MM-DD.md`; the dashboard shows it read-only at `/reports` (needs `QODER_PERSONAL_ACCESS_TOKEN`) |
 | Eval set and gate | Not started |
 
 ---
