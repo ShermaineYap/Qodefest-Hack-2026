@@ -27,6 +27,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-034 | Implement the backend: API gateway, scoring service, `/risk/link` and agent endpoints; agree the API contract with Fihkri (D-002) | doing | | Fihkri | |
 | T-038 | Decide what runs on the team server and how the backend deploys | done | | | |
 | T-042 | Redeploy the enclave (`./deploy.sh`) to ship the brand/deny-list floors from D-012 | todo | | Shermaine Yap | |
+| T-046 | Redeploy the gateway and verify a first scam returns `new_scam` and an exact repeat returns `known_scam` through the public tunnel (D-015) | todo | | | |
 
 ## Fihkri
 
