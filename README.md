@@ -234,6 +234,11 @@ This repository is the main workspace for Qodefest Hack 2026. Today it contains 
 
 ---
 
+## Working together
+
+Read [`team/README.md`](team/README.md) first. Roles, timeline, backlog, decisions and session logs live in `team/`;
+every agent follows [`.qoder/rules/team-harness.md`](.qoder/rules/team-harness.md).
+
 ## Repository layout
 
 ```
