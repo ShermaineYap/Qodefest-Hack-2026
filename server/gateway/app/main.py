@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 
 from app.client import EnclaveClient, EnclaveUnavailable
-from app.models import RiskRequest, Verdict
+from app.models import RedactedPayload, Verdict
 
 app = FastAPI(title="Lantern gateway")
 enclave = EnclaveClient()
@@ -19,10 +19,11 @@ def ping() -> str:
     return "ping"
 
 
-# Transport only. The enclave owns redaction, rules and scoring.
+# Transport only. The enclave owns redaction checks, rules and scoring.
+# A non-2xx response tells the extension to render NOT CHECKED (fail closed).
 @app.post("/risk/link", response_model=Verdict)
-async def risk_link(req: RiskRequest) -> Verdict:
+async def risk_link(payload: RedactedPayload) -> Verdict:
     try:
-        return await enclave.score(req)
+        return await enclave.score(payload)
     except EnclaveUnavailable:
-        return Verdict(tier="NOT_CHECKED", error="enclave_unavailable")
+        raise HTTPException(status_code=503, detail="enclave_unavailable")

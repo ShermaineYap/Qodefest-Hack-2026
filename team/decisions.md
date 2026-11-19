@@ -46,6 +46,12 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Why: Lantern carries light into what a link or page is really doing — protection plus an agent to ask about hidden or unclear features — without the fear framing of "guard".
 - Affects: everyone — use "Lantern" in the UI, docs, pitch and repo references.
 
+## D-008 — 2026-11-19 — `/risk/link` contract v0.1 matches the extension's `RedactedPayload`
+- Decided by: Fahreza Alghifari
+- Decision: The scoring API accepts the extension's `RedactedPayload` (`extension/src/types.ts`) and returns `{request_id, tier: low|medium|high, score, headline, sentences, checked, category, held_for_review, checks}` — the exact shape `extension/src/background.ts` parses. The raw URL never crosses the network. Behavior is fail-closed: any non-2xx (e.g. `503 {"detail":"enclave_unavailable"}` when the enclave is down) makes the extension render NOT CHECKED, never green. Contract: `server/README.md` (v0.1).
+- Why: the extension and its mock already define this contract; aligning the server keeps redaction on-device and requires no changes to Fihkri's working client.
+- Affects: Fihkri (T-040), Fahreza Alghifari (future contract changes are appended here first)
+
 ## D-007 — 2026-11-19 — Backend deployment: Docker Compose + gateway/enclave split
 - Decided by: Fahreza Alghifari
 - Decision: Backend deploys as two FastAPI services via Docker Compose on the team server (172.104.41.120): `gateway` on :4000 (the only public surface) and `enclave` on :3100 (compose network only, never routed). An internal nginx routes `/risk/*`, `/agent*`, `/health`, `/api/ping` to the gateway; public traffic arrives through a Cloudflare quick tunnel, so no inbound HTTP ports are open (ufw allows SSH only). Code lives in `server/`; the contract and deployment runbook are in `server/README.md`. The extension calls `${BASE}/risk/link` — spec paths unchanged.
