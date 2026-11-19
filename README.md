@@ -207,15 +207,16 @@ Page-content inspection (forms, brand assets, screenshots) is deliberately **v1.
 
 ## Status
 
-This repository is the main workspace for Qodefest Hack 2026. Today it contains this README only; there is no runnable extension yet.
+This repository is the main workspace for Qodefest Hack 2026. The extension is scaffolded (T-033), the scoring API `/risk/link` is deployed and live behind a Cloudflare quick tunnel (contract v0.1 in [`server/README.md`](server/README.md)), and Ask SHOU v1 lives in `server/index.ts` (Vercel/local, not yet in the Docker stack).
 
 | Area | State |
 |---|---|
 | Product spec, threat model, trust boundary | This README |
-| Extension scaffold + assistant panel | Not started |
-| URL normaliser + deterministic rules | Not started |
-| Warning interstitial + navigation hook | Not started |
-| `/risk/link` + agent endpoint | Not started |
+| Extension scaffold + assistant panel | Scaffolded (T-033); needs manual Chrome test |
+| URL normaliser + deterministic rules | Done (extension on-device; server re-derives from flags) |
+| Warning interstitial + navigation hook | Scaffolded; needs manual Chrome test |
+| `/risk/link` | Live at the current tunnel host — see `server/README.md` |
+| Agent endpoint | Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
 | Eval set and gate | Not started |
 
 ---
@@ -243,16 +244,16 @@ every agent follows [`.qoder/rules/team-harness.md`](.qoder/rules/team-harness.m
 ```
 Qodefest-Hack-2026/
 ├── README.md
-├── extension/            Chrome MV3 extension                         [planned]
+├── extension/            Chrome MV3 extension
 │   └── src/
 │       ├── content.ts        reads links, redacts on-device, badges
 │       ├── background.ts     service worker — only network surface
 │       ├── link.ts           URL normaliser + deterministic rules
 │       ├── warning/          interstitial + navigation hook
 │       └── panel/            assistant side panel
-├── server/               API gateway + scoring/agent service           [planned]
+├── server/               gateway + enclave (Python, compose), Ask SHOU (TS)
 ├── eval/                 fixtures, harness, metrics                    [planned]
-└── docs/                 decisions, runbook, eval notes                [planned]
+└── docs/                 decisions, runbook, eval notes
 ```
 
 Paths marked `[planned]` do not exist yet. The README describes the target shape so the first commits have somewhere to land.
