@@ -16,6 +16,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
 | T-037 | Confirm your area in `roles.md` as part of the M0 ownership split | todo | | | |
+| T-039 | Build Ask SHOU v1: bounded check agent, standalone `panel/`, Vercel API, docs and tests (branch `ask-shou`, PR #1) | done | | | |
 
 ## Fahreza Alghifari
 

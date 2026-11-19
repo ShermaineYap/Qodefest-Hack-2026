@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "panel",
+  "functions": {
+    "api/agent/chat.ts": {
+      "maxDuration": 15
+    }
+  }
+}
