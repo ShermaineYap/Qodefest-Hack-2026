@@ -4,6 +4,7 @@ import type { ExtensionMessage, RiskResult, ScoreStatus, Tier } from './messages
 import { TIER_RANK } from './messages.ts';
 import { buildPayload } from './redact.ts';
 import type { Analysis, RedactedPayload } from './types.ts';
+import { elevate } from './verdict.ts';
 
 const NOT_CHECKED_REASON =
   'The checking service did not answer. Treat this link as unverified.';
@@ -75,7 +76,7 @@ function worseResult(first: RiskResult, second: RiskResult): RiskResult {
   return second.score > first.score ? second : first;
 }
 
-async function scorePayload(payload: RedactedPayload): Promise<ScoreStatus> {
+async function scorePayload(payload: RedactedPayload, localScore: number): Promise<ScoreStatus> {
   const key = cacheKey(payload.host, payload.pathShape);
   const cached = verdicts.get(key);
   if (cached) return { status: 'scored', result: cached };
@@ -102,7 +103,8 @@ async function scorePayload(payload: RedactedPayload): Promise<ScoreStatus> {
   const fresh = parseRiskResult(raw);
   if (!fresh) return notChecked(payload.localSignals);
 
-  const result = cached ? worseResult(cached, fresh) : fresh;
+  const lifted = elevate(fresh, localScore);
+  const result = cached ? worseResult(cached, lifted) : lifted;
   verdicts.set(key, result);
   return { status: 'scored', result };
 }
@@ -141,7 +143,7 @@ async function handle(
 ): Promise<unknown> {
   switch (message.type) {
     case 'score':
-      return scorePayload(message.payload);
+      return scorePayload(message.payload, message.localScore);
     case 'get-verdict':
       return getVerdict(message.url);
     case 'go-back': {
@@ -170,13 +172,15 @@ async function onBeforeNavigate(details: chrome.webNavigation.WebNavigationParen
   if (!analysis.ok) return false;
 
   const payload = buildPayload(url, analysis);
-  const verdict = await scorePayload(payload);
+  const verdict = await scorePayload(payload, analysis.localScore);
   if (verdict.status !== 'scored' || verdict.result.tier !== 'high') return false;
 
-  warned.add(url);
+  // During onBeforeNavigate, tab.url is still the previous page and pendingUrl may not be set
+  // yet, so only bail when a different navigation is actually pending.
   const tab = await chrome.tabs.get(details.tabId);
-  if (tab.url !== url) return false;
+  if (tab.pendingUrl !== undefined && tab.pendingUrl !== url && tab.url !== url) return false;
 
+  warned.add(url);
   const warningUrl = chrome.runtime.getURL(WARNING_PAGE) + '?u=' + encodeURIComponent(url);
   await chrome.tabs.update(details.tabId, { url: warningUrl });
   return true;

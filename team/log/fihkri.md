@@ -2,6 +2,11 @@
 
 Newest first. Only Fihkri's agent writes here.
 
+## 2026-11-19 13:45 +08
+- Did: Integrated the extension with Fahreza's backend (T-040, contract v0.1 / D-008): `API_BASE` now points at the Cloudflare quick tunnel and `host_permissions` covers `*.trycloudflare.com` plus localhost:4000. Kept the worse of the server tier and the on-device score (`src/verdict.ts`, D-010), because v0.1 ignores `localSignals` and scored the deny-listed Maybank lookalike LOW. Fixed the HIGH interstitial: the `tab.url !== url` race guard was always true during `onBeforeNavigate`, so the warning page never opened. Verified typecheck, 29 unit tests, live tunnel (HIGH/MEDIUM/LOW), and the Playwright sim 13/13.
+- Next: Load `extension/dist` unpacked for the demo; re-point `API_BASE` when the tunnel restarts (server/README.md "Deployment"); rename the UI to Lantern per D-006.
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 13:26 +08
 - Did: Scaffolded the Chrome MV3 extension under `extension/` (T-033): URL normaliser + deterministic rules, on-device redaction payload, badges for WhatsApp/Telegram/Messenger, service worker scoring client (fail-closed, worst-verdict-wins cache), HIGH navigation interstitial, assistant side panel, esbuild build, 25 unit tests, plus a dev-only mock `/risk/link` on localhost:4000.
 - Next: Load `extension/dist` unpacked in Chrome and demo the three surfaces with `npm run mock-api`; switch to the real API when Fahreza's T-034 lands.

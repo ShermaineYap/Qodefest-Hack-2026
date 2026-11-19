@@ -64,3 +64,8 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Why: lets the extension wire real requests end to end before any model or agent contract exists, and keeps the data inspectable on the host with plain `sqlite3`.
 - Affects: Fihkri (optional client wiring), Fahreza Alghifari (temporary gateway state; remove in M2)
 
+## D-010 — 2026-11-19 — Extension keeps the worse of the server tier and its on-device score
+- Decided by: Fihkri
+- Decision: `/risk/link` v0.1 re-derives its score from the redacted `flags` and treats `localSignals` as advisory. The extension therefore sends its own on-device score with each check and shows the worse of the server tier and that score (`extension/src/verdict.ts`, same 80/45 thresholds). A strong local rule (deny list 95, brand impersonation 85, credential harvest 80) can raise the badge; the server tier is never lowered, and a failed check still renders NOT CHECKED, never green.
+- Why: deny-list and brand-impersonation knowledge exists only on-device — the payload has no flag for it — so server-only scoring showed green on a deny-listed Maybank lookalike (local floor 95, server 25). This restores fail-safe behaviour without weakening the server's authority.
+- Affects: Fihkri (extension), Fahreza Alghifari (server rules that overlap the local ones).

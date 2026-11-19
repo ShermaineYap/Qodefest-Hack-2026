@@ -32,7 +32,8 @@ npm run mock-api
 ```
 
 Starts a canned scoring service on `http://localhost:4000` (POST `/risk/link`, GET `/health`).
-It is a development aid only; the real API belongs to the backend owner (T-034).
+Switch `API_BASE` in `src/config.ts` to `http://localhost:4000` to use it. It is a development aid
+only; the real API belongs to the backend owner (T-034).
 
 ## Layout
 
@@ -44,9 +45,12 @@ It is a development aid only; the real API belongs to the backend owner (T-034).
 - `src/panel/` - assistant side panel
 - `src/selectors.ts` - per-site DOM selectors (one table, pinned by tests)
 
-## API contract (draft for T-034)
+## API contract v0.1 (`server/README.md`)
 
-`POST {API_BASE}/risk/link`. Types live in `src/types.ts` and `src/messages.ts`.
+`POST {API_BASE}/risk/link`. Types live in `src/types.ts` and `src/messages.ts`. `API_BASE` is in
+`src/config.ts`: the public demo gateway (an ephemeral Cloudflare quick tunnel — refresh the
+hostname from `server/README.md` "Deployment" when it restarts) or `http://localhost:4000` for local
+development. `host_permissions` covers `https://*.trycloudflare.com/*` and localhost.
 
 Request body (`RedactedPayload` v1):
 
@@ -92,6 +96,10 @@ Response:
 
 Client behavior: 8 s timeout; any failure or unreadable answer becomes NOT CHECKED. The client never
 invents a LOW. The worker is the only place that calls this endpoint.
+
+The server re-derives its score from the redacted flags only, so the extension keeps the worse of
+the server tier and its own on-device score (`src/verdict.ts`): a deny-listed or brand-impersonating
+host can be raised but never lowered, and never renders green.
 
 ## Scaffold limits
 

@@ -5,7 +5,7 @@
   "description": "Reads the link before she does.",
   "minimum_chrome_version": "116",
   "permissions": ["sidePanel", "webNavigation", "tabs"],
-  "host_permissions": ["http://localhost:4000/*"],
+  "host_permissions": ["https://*.trycloudflare.com/*", "http://localhost:4000/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"

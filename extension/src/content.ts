@@ -109,9 +109,13 @@ async function scoreHref(href: string): Promise<void> {
   inFlight.add(href);
 
   let payload: ReturnType<typeof buildPayload> | null = null;
+  let localScore = 0;
   try {
     const analysis = analyseUrl(href);
-    if (analysis.ok) payload = buildPayload(href, analysis);
+    if (analysis.ok) {
+      payload = buildPayload(href, analysis);
+      localScore = analysis.localScore;
+    }
   } catch {
     payload = null;
   }
@@ -122,7 +126,7 @@ async function scoreHref(href: string): Promise<void> {
     return;
   }
 
-  const message: ExtensionMessage = { type: 'score', payload };
+  const message: ExtensionMessage = { type: 'score', payload, localScore };
 
   try {
     const response: unknown = await chrome.runtime.sendMessage(message);

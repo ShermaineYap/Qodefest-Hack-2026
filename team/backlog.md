@@ -30,4 +30,4 @@ Status: `todo` · `doing` · `blocked` · `done`
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
 | T-033 | Scaffold the Chrome MV3 extension: content script, service worker, URL normaliser, warning page, assistant panel | done | | | |
-| T-040 | Wire the extension service worker to `POST /risk/link` per the contract in `server/README.md` (base URL, `NOT_CHECKED` handling, no green on failure). Ask Fahreza for the current tunnel host; raise CORS/origin needs as a task if `host_permissions` is not enough | todo | | Fahreza Alghifari | |
+| T-040 | Wire the extension service worker to `POST /risk/link` per the contract in `server/README.md` (base URL, `NOT_CHECKED` handling, no green on failure). Ask Fahreza for the current tunnel host; raise CORS/origin needs as a task if `host_permissions` is not enough | done | | Fahreza Alghifari | |

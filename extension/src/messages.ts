@@ -18,7 +18,7 @@ export type ScoreStatus =
   | { status: 'not_checked'; reason: string; localSignals: string[] };
 
 export type ExtensionMessage =
-  | { type: 'score'; payload: RedactedPayload }
+  | { type: 'score'; payload: RedactedPayload; localScore: number }
   | { type: 'get-verdict'; url: string }
   | { type: 'go-back' }
   | { type: 'continue'; url: string };
