@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern — test bench</title>
+<style>
+  :root{
+    --page:#0a0f1a; --card:#0f1829; --card2:#121d33; --line:#22304d;
+    --ink:#e9eefb; --mut:#93a3c4; --dim:#6b7a99;
+    --gold:#f5a524; --gold-soft:rgba(245,165,36,.14);
+    --red:#f87171; --red-soft:rgba(248,113,113,.12);
+    --amber:#fbbf24; --green:#34d399; --green-soft:rgba(52,211,153,.12);
+    --cyan:#38bdf8;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--page);color:var(--ink);
+    font:16px/1.6 "Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    padding:48px 20px 80px;
+  }
+  .wrap{width:min(980px,100%);margin:0 auto}
+  .mono{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:.92em}
+  h1{font-size:clamp(28px,4vw,40px);letter-spacing:-.02em;margin:0 0 10px}
+  h2{font-size:20px;letter-spacing:-.01em;margin:0 0 4px}
+  h2 .n{color:var(--gold);margin-right:8px}
+  p{margin:0 0 12px;color:var(--mut)}
+  .lead{max-width:75ch;font-size:15.5px}
+  .warn{
+    margin:20px 0 32px;padding:14px 18px;border-left:3px solid var(--gold);
+    background:var(--gold-soft);border-radius:0 12px 12px 0;color:var(--ink);font-size:14.5px;
+  }
+  .card{
+    background:linear-gradient(180deg,var(--card2),var(--card));
+    border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:0 0 18px;
+  }
+  .card p:last-child{margin-bottom:0}
+  ul{margin:10px 0 0;padding-left:20px;color:var(--mut);font-size:14.5px}
+  li{padding:3px 0}
+  code{
+    font-family:ui-monospace,Consolas,monospace;font-size:.88em;color:var(--cyan);
+    background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.18);
+    border-radius:6px;padding:1px 6px;
+  }
+  .links{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+  .links li{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:var(--card);
+  }
+  .links a{color:var(--cyan);text-decoration:none;word-break:break-all}
+  .links a:hover{text-decoration:underline}
+  .tier{
+    font-size:10.5px;font-weight:800;letter-spacing:.08em;padding:3px 8px;border-radius:999px;
+    border:1px solid var(--line);white-space:nowrap;
+  }
+  .tier.high{color:var(--red);background:var(--red-soft);border-color:rgba(248,113,113,.35)}
+  .tier.med{color:var(--amber);background:rgba(251,191,36,.09);border-color:rgba(251,191,36,.35)}
+  .tier.low{color:var(--green);background:var(--green-soft);border-color:rgba(52,211,153,.35)}
+  .score{margin-left:auto;font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+  .pick{
+    width:100%;margin-top:8px;padding:10px 12px;border-radius:9px;border:1px solid var(--line);
+    background:var(--page);color:var(--ink);font:13px/1.45 ui-monospace,Consolas,monospace;resize:vertical;
+  }
+  .pick:focus{outline:2px solid var(--gold);outline-offset:1px}
+  .hint{font-size:12px;color:var(--dim);margin-top:6px}
+  .back{display:inline-block;margin-bottom:26px;color:var(--mut);font-size:13px;text-decoration:none}
+  .back:hover{color:var(--gold)}
+  footer{margin-top:36px;padding-top:18px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="lantern-demo-deck.html">&larr; Back to the deck</a>
+
+  <h1>Lantern — test bench</h1>
+  <p class="lead">Open this page in the Chrome profile that has the unpacked extension loaded, then work down
+  the sections. Each click exercises a different surface: the warning page, the in-chat badge, the assistant
+  panel, and the honest-failure path.</p>
+
+  <div class="warn"><b>Every scam address here is fabricated.</b> None of the lookalike domains resolve, and the
+  warning page renders before any request is made, so even a mis-click loads nothing. Do not substitute a
+  real phishing link.</div>
+
+  <section class="card">
+    <h2><span class="n">0</span>Load the extension</h2>
+    <ul>
+      <li><code>cd extension</code> → <code>npm install</code> → <code>npm run build</code></li>
+      <li><code>chrome://extensions</code> → turn on <b>Developer mode</b> → <b>Load unpacked</b> → pick <code>extension/dist</code></li>
+      <li>Pin the side panel, then confirm <code>&lt;API_BASE&gt;/health</code> returns <code>{"status":"ok"}</code></li>
+    </ul>
+    <p class="hint">If the tunnel moved, update <code>API_BASE</code> in <code>extension/src/config.ts</code> and rebuild.
+    The current host is in <code>server/README.md</code> under “Deployment”.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">1</span>Address bar — HIGH should interrupt before the page loads</h2>
+    <p>Click a link or type it. The current tab is replaced by the warning screen; use <b>Go back to safety</b>,
+    then Back to return here.</p>
+    <ul class="links">
+      <li><span class="tier high">HIGH</span><a href="https://maybank2u-secure-login.xyz/login" rel="noopener">maybank2u-secure-login.xyz/login</a><span class="score">85 · brand + credential harvest</span></li>
+      <li><span class="tier high">HIGH</span><a href="https://maybank-secure-login.xyz/login" rel="noopener">maybank-secure-login.xyz/login</a><span class="score">95 · deny list</span></li>
+      <li><span class="tier high">HIGH</span><a href="https://secure-cimb.com/login" rel="noopener">secure-cimb.com/login</a><span class="score">85 · brand + credential harvest</span></li>
+      <li><span class="tier high">HIGH</span><a href="https://poslaju.com.my.track-parcel.top/track" rel="noopener">poslaju.com.my.track-parcel.top/track</a><span class="score">85 · brand hidden in the subdomain</span></li>
+      <li><span class="tier high">HIGH</span><a href="https://xn--mybank-3nf.com/login" rel="noopener">xn--mybank-3nf.com/login</a><span class="score">80 · lookalike characters</span></li>
+      <li><span class="tier low">CONTROL</span><a href="https://www.maybank2u.com.my" rel="noopener">www.maybank2u.com.my</a><span class="score">0 · opens normally</span></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span>In-chat badge — paste one of these into WhatsApp Web</h2>
+    <p>The badge starts as <code>⋯ Checking</code> and resolves without a click. Click a field to select the
+    whole link, then paste it into a message to yourself or from a teammate's phone.</p>
+    <input class="pick" readonly value="https://shopee-my-reward.xyz/claim" aria-label="HIGH link 85">
+    <div class="hint"><span class="tier high">HIGH</span> 85 · expect a red badge</div>
+    <input class="pick" readonly value="https://maybank2u-secure-login.xyz/login" aria-label="HIGH link 85">
+    <div class="hint"><span class="tier high">HIGH</span> 85 · expect a red badge</div>
+    <input class="pick" readonly value="https://www.maybank2u.com.my@evil-site.top/login" aria-label="MEDIUM link 70">
+    <div class="hint"><span class="tier med">MEDIUM</span> 70 · address starts with the real bank, then <code>@evil-site.top</code></div>
+    <input class="pick" readonly value="http://203.0.113.7/verify" aria-label="MEDIUM link 60">
+    <div class="hint"><span class="tier med">MEDIUM</span> 60 · IP literal over plain HTTP</div>
+    <input class="pick" readonly value="https://www.google.com/maps/place/KLCC" aria-label="LOW link">
+    <div class="hint"><span class="tier low">LOW</span> 0 · expect a green badge</div>
+    <input class="pick" readonly value="https://www.maybank2u.com.my/home/m2u/common/login.do" aria-label="LOW link">
+    <div class="hint"><span class="tier low">LOW</span> 0 · expect a green badge</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span>Assistant panel — paste a message, then press “Ask Lantern Assistant to explain”</h2>
+    <p>The verdict is the demo point; wording depends on whether the tunnel runs the keyword mock or a real
+    model. A message with a clean link can still be <b>Unsure</b> — that is the intended behaviour.</p>
+    <textarea class="pick" rows="2" readonly aria-label="Assistant prompt: small talk">Hi, are we still meeting for lunch at 1? I will send the location later.</textarea>
+    <div class="hint">No link, nothing suspicious → <b>Not a scam</b></div>
+    <textarea class="pick" rows="2" readonly aria-label="Assistant prompt: clean link">Is this the official LHDN portal? https://www.lhdn.gov.my/</textarea>
+    <div class="hint">Clean address → <b>Not a scam</b></div>
+    <textarea class="pick" rows="2" readonly aria-label="Assistant prompt: uncertain parcel">My parcel is delayed. Is this tracking link normal? https://www.poslaju.com.my/track</textarea>
+    <div class="hint">Clean address, uncertain message → <b>Unsure</b></div>
+    <textarea class="pick" rows="2" readonly aria-label="Assistant prompt: scam">Your Maybank account is suspended. Verify within 24 hours: https://maybank2u-secure-login.xyz/login</textarea>
+    <div class="hint">Red link + 24-hour pressure → <b>Scam</b>; open “What leaves this device” and read the request id</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span>Honest failure — stop the gateway</h2>
+    <ul>
+      <li>Stop the gateway process (or point <code>API_BASE</code> at an unused port and rebuild).</li>
+      <li>Paste a link and ask a question: both surfaces must say <b>NOT CHECKED</b> / “treat this as unverified”.</li>
+      <li>Nothing may turn green. That is the rule the whole product is built around.</li>
+    </ul>
+  </section>
+
+  <footer>Team Pattaya Fried Rice · Qodefest Hack 2026 · Full sequence and link bank: <code>docs/demo-script.md</code></footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  document.querySelectorAll(".pick").forEach(function (field) {
+    field.addEventListener("focus", function () { field.select(); });
+    field.addEventListener("click", function () { field.select(); });
+  });
+})();
+</script>
+</body>
+</html>

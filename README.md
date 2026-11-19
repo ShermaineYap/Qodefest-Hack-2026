@@ -284,6 +284,11 @@ Verified against `main` on 2026-11-19. For the presenting laptop. The full scrip
 expected badge and score for each, plus assistant replies — is in
 [`docs/demo-script.md`](docs/demo-script.md).
 
+Slides: open [`deck/lantern-demo-deck.html`](deck/lantern-demo-deck.html) in a browser (arrows to move,
+`D` for day mode). Its last slide links to [`deck/test-links.html`](deck/test-links.html), a click-through
+bench that walks the warning page, in-chat badges and the assistant panel in a profile with the
+extension loaded.
+
 ### Setup (10 minutes)
 
 1. Build the extension:

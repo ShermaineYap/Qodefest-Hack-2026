@@ -149,6 +149,7 @@
   .btn.primary{background:var(--gold);border-color:var(--gold);color:#171105}
   .btn.ghost{background:transparent;color:var(--mut)}
   .btn.danger{background:transparent;border-color:transparent;color:var(--red);text-decoration:underline;text-underline-offset:3px}
+  a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
   .note{
     margin-top:14px;font-size:12.5px;color:var(--dim);border-top:1px dashed var(--line);padding-top:12px;
   }
@@ -378,10 +379,10 @@
   </section>
 
   <!-- 4 -------------------------------------------------------------- -->
-  <section class="slide" data-title="Two surfaces">
+  <section class="slide" data-title="Three surfaces">
     <div class="wrap">
       <div class="kick">The product</div>
-      <h2>Two surfaces, one detection pipeline.</h2>
+      <h2>Three ways in, one decision.</h2>
       <div class="grid g3">
         <div class="card">
           <div class="muted-head">Passive</div>
@@ -513,6 +514,73 @@
   </section>
 
   <!-- 8 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Agentic assistant">
+    <div class="wrap">
+      <div class="kick">Agentic AI</div>
+      <h2>It asks the right questions — then it stops.</h2>
+      <p class="lead" style="max-width:88ch">The assistant is not one model guessing at a message. It reasons over checks it can point to, inside a budget it cannot exceed, and it has to show its work.</p>
+      <div class="grid g2" style="align-items:start">
+        <div class="pipe">
+          <div class="step"><div class="n">1</div><div><b>Read the message, not the page</b><br><span class="small">the pasted text, the redacted link facts the extension already computed, an optional screenshot</span></div><span class="tag">/agent/message</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">2</div><div><b>Choose a check</b><br><span class="small">allowlisted tools only: score the link, expand a redirect, domain reputation, score the message</span></div><span class="tag">M2 tool loop</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">3</div><div><b>Ask the model — once or twice</b><br><span class="small">then answer with what is known, even if that is “I am not sure”</span></div><span class="tag">≤ 2 calls · ≤ 12 s</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">4</div><div><b>Show the evidence</b><br><span class="small">a verdict, 0–3 reasons, and the request id that produced them</span></div><span class="tag">ledger</span></div>
+        </div>
+        <div class="card">
+          <div class="muted-head">Hard limits, not guidelines</div>
+          <table class="rules-table">
+            <tr><td>Tool calls per turn</td><td>≤ 3</td></tr>
+            <tr><td>Model calls per turn</td><td>≤ 2</td></tr>
+            <tr><td>Time before it must answer</td><td>≤ 12 s</td></tr>
+            <tr><td>Panel gives up at</td><td>22 s → NOT CHECKED</td></tr>
+            <tr><td>Live scoring round trip</td><td>0.3–0.5 s</td></tr>
+            <tr><td>Live model answer (measured)</td><td>~2.7 s</td></tr>
+          </table>
+          <p class="small" style="margin-top:14px">No model key? It answers from deterministic keyword rules and labels itself <span class="mono">model: mock</span> — it never pretends a model spoke.</p>
+        </div>
+      </div>
+      <div class="takeaway">It can say “I am not sure”. It cannot say “you are safe”, invent a green, obey instructions inside the message, or remember it after the panel closes.</div>
+    </div>
+  </section>
+
+  <!-- 9 -------------------------------------------------------------- -->
+  <section class="slide" data-title="Real-time detection">
+    <div class="wrap">
+      <div class="kick">Real time</div>
+      <h2>Before the page loads. Before she clicks.</h2>
+      <div class="grid g2" style="align-items:start">
+        <div class="card">
+          <div class="muted-head">In the chat — a badge appears in place</div>
+          <ul class="clean">
+            <li>link appears → 400 ms debounce → <b>⋯ Checking</b> → tier badge</li>
+            <li>chats are re-scanned every 3 s, so lazy-loaded messages are caught too</li>
+            <li>each link is annotated once — no badge spam in a busy thread</li>
+            <li>MEDIUM annotates, HIGH turns red; she never has to press anything</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="muted-head">In the address bar — the page never renders</div>
+          <ul class="clean">
+            <li>Enter → <span class="mono">onBeforeNavigate</span> → verdict before a single byte is fetched</li>
+            <li>HIGH replaces the tab with the warning screen; MEDIUM only annotates</li>
+            <li>worst verdict wins for the session — a red cannot flip to green</li>
+            <li>no answer in 8 s → NOT CHECKED, never green</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid g3" style="margin-top:16px">
+        <div class="card tight"><div class="stat">400<span style="font-size:.45em"> ms</span></div><p>rescan debounce after the chat mutates</p></div>
+        <div class="card tight"><div class="stat">0.3–0.5<span style="font-size:.45em"> s</span></div><p>live <span class="mono">/risk/link</span> round trip, measured 2026-11-19</p></div>
+        <div class="card tight"><div class="stat">0<span style="font-size:.45em"> clicks</span></div><p>needed before the first verdict appears</p></div>
+      </div>
+      <div class="takeaway">Detection is a side effect of reading the chat. She does not have to suspect the link to be protected from it.</div>
+    </div>
+  </section>
+
+  <!-- 10 ------------------------------------------------------------- -->
   <section class="slide" data-title="How it works">
     <div class="wrap">
       <div class="kick">How it works</div>
@@ -546,7 +614,7 @@
     </div>
   </section>
 
-  <!-- 9 -------------------------------------------------------------- -->
+  <!-- 11 ------------------------------------------------------------- -->
   <section class="slide" data-title="Trust boundary">
     <div class="wrap">
       <div class="kick">Trust boundary</div>
@@ -577,7 +645,7 @@
     </div>
   </section>
 
-  <!-- 10 ------------------------------------------------------------- -->
+  <!-- 12 ------------------------------------------------------------- -->
   <section class="slide" data-title="Fail closed">
     <div class="wrap">
       <div class="kick">Non-negotiable rules</div>
@@ -592,7 +660,7 @@
     </div>
   </section>
 
-  <!-- 11 ------------------------------------------------------------- -->
+  <!-- 13 ------------------------------------------------------------- -->
   <section class="slide" data-title="Built today">
     <div class="wrap">
       <div class="kick">Built today</div>
@@ -611,7 +679,7 @@
             <li>live scoring API and fail-closed client</li>
             <li>assistant chat on <span class="mono">/agent/message</span> (text or screenshot)</li>
             <li>end-to-end sim: <span class="mono">npm run sim</span> loads the extension and checks badges</li>
-            <li>demo runbook in the README</li>
+            <li>demo runbook in <span class="mono">docs/</span>, plus a click-through test bench</li>
           </ul>
         </div>
         <div class="card">
@@ -627,7 +695,7 @@
     </div>
   </section>
 
-  <!-- 12 ------------------------------------------------------------- -->
+  <!-- 14 ------------------------------------------------------------- -->
   <section class="slide" data-title="Roadmap and team">
     <div class="wrap">
       <div class="kick">What is next</div>
@@ -651,10 +719,44 @@
     </div>
   </section>
 
+  <!-- 15 ------------------------------------------------------------- -->
+  <section class="slide" data-title="Test it yourself">
+    <div class="wrap">
+      <div class="kick">Live in your browser</div>
+      <h2>Load it in Chrome. Try to get past it.</h2>
+      <div class="grid g2" style="align-items:start">
+        <div class="pipe">
+          <div class="step"><div class="n">1</div><div><b>Build the extension</b><br><span class="small mono">cd extension &amp;&amp; npm install &amp;&amp; npm run build</span></div><span class="tag">terminal</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">2</div><div><b>Load it</b><br><span class="small"><span class="mono">chrome://extensions</span> → Developer mode → Load unpacked → <span class="mono">extension/dist</span>, then pin the side panel</span></div><span class="tag">chrome</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">3</div><div><b>Type a scam address</b><br><span class="small mono">maybank2u-secure-login.xyz/login</span><br><span class="small">the warning replaces the tab before the page loads; then try <span class="mono">www.maybank2u.com.my</span> — nothing happens</span></div><span class="tag">address bar</span></div>
+          <div class="arrowdown"></div>
+          <div class="step"><div class="n">4</div><div><b>Ask the assistant</b><br><span class="small">paste a message with a link into the side panel, press “Ask Lantern Assistant to explain”, open “What leaves this device”</span></div><span class="tag">side panel</span></div>
+        </div>
+        <div class="card">
+          <h3>What to look for</h3>
+          <ul class="clean">
+            <li>a red badge in a chat within a second — no click, no prompt</li>
+            <li>“Go back to safety” filled and focused; “Continue anyway” plain and never pre-selected</li>
+            <li>reasons and a request id under every assistant answer</li>
+            <li>stop the gateway → NOT CHECKED and “treat this as unverified”, never green</li>
+          </ul>
+          <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px">
+            <a class="btn primary" href="test-links.html" target="_blank" rel="noopener">Open the test bench ↗</a>
+            <a class="btn ghost" href="../docs/demo-script.md" target="_blank" rel="noopener">Demo runbook</a>
+          </div>
+          <p class="small" style="margin-top:14px">Every scam address in the bench is fabricated and does not resolve. The warning renders before any request, so a mis-click loads nothing.</p>
+        </div>
+      </div>
+      <p class="small" style="margin-top:16px">Team Pattaya Fried Rice · Qodefest Hack 2026 · Built from <span class="mono">main</span>, 2026-11-19.</p>
+    </div>
+  </section>
+
 </main>
 
 <nav class="dots" id="dots" aria-label="Slide navigation"></nav>
-<div class="counter" id="counter">01 / 12</div>
+<div class="counter" id="counter">01 / 15</div>
 <div class="keyhint">← → move · D day/night · P print</div>
 
 <script>

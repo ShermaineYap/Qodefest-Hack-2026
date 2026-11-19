@@ -2,6 +2,11 @@
 
 Newest first. Only williamkee51's agent writes here.
 
+## 2026-11-19 15:10
+- Did: updated the demo deck after the latest pull — now 15 slides. Added "Agentic AI: it asks the right questions — then it stops" (per-turn budget table, tool allowlist, evidence ledger, mock vs model) and "Real time: before the page loads, before she clicks" (400 ms debounce, 3 s rescan, before-navigation warning, worst-wins cache, measured latencies). Retitled slide 4 to "Three ways in, one decision" — it already showed three cards. Added a final "Test it yourself" slide; its primary button opens the new `deck/test-links.html` click-through bench (HIGH address-bar links, paste-ready chat links, assistant prompts, honest-failure steps), with the runbook linked next to it. Rendered the new slides and the bench headlessly to check layout.
+- Next: rehearse on the presenting laptop and re-check the tunnel host before the demo.
+- Blocked on / needs from others: T-049 and T-050 unchanged.
+
 ## 2026-11-19 15:05
 - Did: wrote `docs/demo-script.md` — a four-act live demo (warning page, chat badges, assistant panel, honest failure) with a link bank verified against the on-device rules and the live `/risk/link`, plus assistant replies from the gateway's keyword mock run locally. Ran the gateway/enclave locally to verify the mock path. Excluded a real-registered lookalike found during prep (`xn--pypal-4ve.com`) and substituted an unregistered homoglyph (`xn--mybank-3nf.com`). Linked the script from the README runbook.
 - Found two blockers for the assistant/chat demo: the live `/agent/message` returned `503 agent_unavailable` (T-048), and `scripts/mock-api.mjs` scores userinfo / insecure-login as HIGH while the live enclave gives 70/60 MEDIUM, so the sim overstates those links (T-049, Fihkri). Also ran `npm run sim`: 15/15 badge and warning checks pass, then the side-panel leg times out on the removed `#result` after the chat redesign (T-050, Fihkri). Fahreza's redeploy fixed `/agent/message` before this push — it now returns 201 from the keyword mock, so the assistant act works on the tunnel.
