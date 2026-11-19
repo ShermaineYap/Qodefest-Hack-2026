@@ -2,6 +2,11 @@
 
 Newest first. Only Shermaine's agent writes here.
 
+## 2026-11-19 14:55 +08
+- Did: Added side panel screenshots (start, scam message, link check, screenshot attached, screenshot verdict) to `docs/screenshots/` and a table of them under "The side panel" in the README. Taken from the real built extension against the gateway and enclave running locally (keyword mock, so the screenshot verdict shows MEDIUM / unsure).
+- Next: retake the screenshot verdict once the live `/agent/message` answers from Qwen.
+- Blocked on / needs from others: Fahreza: live `/agent/message` returns 503 `agent_unavailable` (T-042).
+
 ## 2026-11-19 14:45 +08
 - Did: Brought the side panel in line with the UI rule: no emojis (tier shown as a word plus the colour bar), Attach/Remove as text, text colours from variables, body text ≥16px in the new parts. Updated `npm run sim` step 6 to wait for the chat's first finished verdict card (`#log .card`) instead of `#result`; it passes ("HIGH RISK"). Sim is 13/16; the 3 failures (IP-literal and `@` userinfo links expected 🔴 but scored 🟡, and the address-bar case that depends on them) fail identically on main without my changes.
 - Next: nothing on the panel unless the team wants the full WareTrack theme pass (Fihkri said he will migrate UI surfaces).

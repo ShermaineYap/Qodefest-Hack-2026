@@ -33,7 +33,7 @@ const T = {
     subtitle: 'Check a link or a message before you act on it.',
     inputLabel: 'Paste the link or the message',
     placeholder: 'For example: maybank-secure-login.xyz/login',
-    check: 'Check',
+    check: 'Check this link',
     checkingLink: 'Checking this link…',
     asking: 'Asking Lantern Assistant…',
     hello: 'Hi. Paste a link or a message that worries you, and I will check it before you act.',
@@ -76,7 +76,7 @@ const T = {
     subtitle: 'Semak pautan atau mesej sebelum anda bertindak.',
     inputLabel: 'Tampal pautan atau mesej',
     placeholder: 'Contoh: maybank-secure-login.xyz/login',
-    check: 'Semak',
+    check: 'Semak pautan ini',
     checkingLink: 'Menyemak pautan ini…',
     asking: 'Bertanya kepada Pembantu Lantern…',
     hello: 'Hai. Tampal pautan atau mesej yang merisaukan anda, saya akan semak sebelum anda bertindak.',
@@ -117,24 +117,21 @@ const T = {
   },
 };
 
-const TIER_ORDER: Record<Tier, number> = { low: 0, medium: 1, high: 2 };
-const TIER_CLASS: Record<Tier, string> = { low: 'card--low', medium: 'card--medium', high: 'card--high' };
-const TIER_LABEL: Record<Tier, string> = { low: 'LOW', medium: 'MEDIUM', high: 'HIGH' };
-const ASSISTANT_CLASS: Record<AssistantTier, string> = {
-  LOW: 'card--low',
-  MEDIUM: 'card--medium',
-  HIGH: 'card--high',
-  NOT_CHECKED: 'card--unknown',
-};
-// Tier is shown as a word plus the card's colour bar (no emojis in the UI, design/DESIGN.md).
-const TIER_WORD: Record<Lang, Record<string, string>> = {
-  en: { low: 'Low risk', medium: 'Medium risk', high: 'High risk', LOW: 'Low risk', MEDIUM: 'Medium risk', HIGH: 'High risk', NOT_CHECKED: 'Not checked' },
-  ms: { low: 'Risiko rendah', medium: 'Risiko sederhana', high: 'Risiko tinggi', LOW: 'Risiko rendah', MEDIUM: 'Risiko sederhana', HIGH: 'Risiko tinggi', NOT_CHECKED: 'Tidak disemak' },
-};
+type IconTier = Tier | 'not_checked' | 'checking';
 
-function tierTag(tier: string): HTMLElement {
-  return make('p', `tier-tag tier-tag--${tier.toLowerCase()}`, TIER_WORD[lang][tier] ?? tier);
-}
+const TIER_HUMAN: Record<Tier | 'not_checked', string> = {
+  low: 'Looks safe',
+  medium: 'Be careful',
+  high: 'Likely scam',
+  not_checked: 'Not checked',
+};
+const ASSISTANT_TO_TIER: Record<AssistantTier, Tier | 'not_checked'> = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  NOT_CHECKED: 'not_checked',
+};
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 let lang: Lang = 'en';
 let busy = false;
@@ -154,6 +151,52 @@ function make<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string,
   if (className) element.className = className;
   if (text !== undefined) element.textContent = text;
   return element;
+}
+
+function svgNode<K extends keyof SVGElementTagNameMap>(tag: K, attributes: Record<string, string>): SVGElementTagNameMap[K] {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
+  return node;
+}
+
+// Tier marks follow design/DESIGN.md: circle-check, triangle-bang, octagon-bang, and a
+// dashed circle for "not checked". No emoji, no colour-only meaning: each card has a label.
+function tierIcon(tier: IconTier): SVGSVGElement {
+  const svg = svgNode('svg', {
+    viewBox: '0 0 24 24',
+    class: `tier-icon tier-icon--${tier}`,
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  const line = { fill: 'none', stroke: 'currentColor', 'stroke-width': '2' };
+  if (tier === 'low') {
+    svg.append(svgNode('circle', { cx: '12', cy: '12', r: '10', ...line }));
+    svg.append(svgNode('path', { d: 'M7.2 12.4l3.2 3.2 6.4-6.6', ...line, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  } else if (tier === 'medium') {
+    svg.append(svgNode('path', { d: 'M12 2.6 22 21H2z', ...line, 'stroke-linejoin': 'round' }));
+    svg.append(svgNode('rect', { x: '11', y: '8.2', width: '2', height: '6', rx: '1', fill: 'currentColor' }));
+    svg.append(svgNode('circle', { cx: '12', cy: '17.4', r: '1.3', fill: 'currentColor' }));
+  } else if (tier === 'high') {
+    svg.append(svgNode('path', { d: 'M8 2h8l6 6v8l-6 6H8l-6-6V8z', ...line, 'stroke-linejoin': 'round' }));
+    svg.append(svgNode('rect', { x: '11', y: '7.5', width: '2', height: '6', rx: '1', fill: 'currentColor' }));
+    svg.append(svgNode('circle', { cx: '12', cy: '16.8', r: '1.3', fill: 'currentColor' }));
+  } else if (tier === 'not_checked') {
+    svg.append(svgNode('circle', { cx: '12', cy: '12', r: '10', ...line, 'stroke-dasharray': '3 3' }));
+    const mark = svgNode('text', { x: '12', y: '16.5', 'text-anchor': 'middle', 'font-size': '12', 'font-weight': '700', fill: 'currentColor' });
+    mark.textContent = '?';
+    svg.append(mark);
+  } else {
+    for (const cx of ['6', '12', '18']) {
+      svg.append(svgNode('circle', { cx, cy: '12', r: '1.8', class: 'dot', fill: 'currentColor' }));
+    }
+  }
+  return svg;
+}
+
+function tierHead(tier: Tier | 'not_checked'): HTMLElement {
+  const head = make('div', 'card__head');
+  head.append(tierIcon(tier), make('p', `tier-label tier-label--${tier}`, TIER_HUMAN[tier]));
+  return head;
 }
 
 function scrollToEnd(): void {
@@ -335,7 +378,12 @@ function addBot(text: string): HTMLElement {
 
 function addPending(text: string): HTMLElement {
   const card = make('div', 'card card--checking');
-  card.append(make('p', 'checking', text));
+  const head = make('div', 'card__head');
+  head.append(tierIcon('checking'), make('p', 'checking', text));
+  card.append(head);
+  const skeleton = make('div', 'skeleton');
+  skeleton.append(make('span'), make('span'), make('span'));
+  card.append(skeleton);
   log.append(card);
   scrollToEnd();
   return card;
@@ -393,7 +441,7 @@ function makeCopyButton(url: string, tier: Tier, headline: string, sentences: st
   const button = make('button', 'button-secondary', L().copy);
   button.type = 'button';
   button.addEventListener('click', async () => {
-    const summary = `Lantern: ${TIER_LABEL[tier]} — ${headline}\n${url}\n${sentences.join('\n')}`;
+    const summary = `Lantern: ${TIER_HUMAN[tier]} — ${headline}\n${url}\n${sentences.join('\n')}`;
     button.disabled = true;
     try {
       await navigator.clipboard.writeText(summary);
@@ -412,8 +460,8 @@ function makeCopyButton(url: string, tier: Tier, headline: string, sentences: st
 
 function linkCard(url: string, status: ScoreStatus, raw: string): HTMLElement {
   if (status.status === 'not_checked') {
-    const card = make('div', 'card card--unknown');
-    card.append(tierTag('NOT_CHECKED'));
+    const card = make('div', 'card');
+    card.append(tierHead('not_checked'));
     card.append(make('h2', 'card__headline', L().couldNotCheckLink));
     card.append(make('p', 'card__sentence', status.reason));
     if (status.localSignals.length > 0) card.append(make('p', 'card__sentence', L().localSignals(status.localSignals.length)));
@@ -421,13 +469,15 @@ function linkCard(url: string, status: ScoreStatus, raw: string): HTMLElement {
     return card;
   }
   const { result } = status;
-  const card = make('div', `card ${TIER_CLASS[result.tier]}`);
-  card.append(tierTag(result.tier));
+  const card = make('div', 'card');
+  card.append(tierHead(result.tier));
   card.append(make('h2', 'card__headline', result.headline));
   for (const sentence of result.sentences) card.append(make('p', 'card__sentence', sentence));
   card.append(make('p', 'meta', `${L().whatChecked}: ${result.checked.join(', ')}.`));
-  card.append(make('p', 'meta', `${L().requestId}: ${result.requestId}`));
-  if (TIER_ORDER[result.tier] >= TIER_ORDER.medium) card.append(makeCopyButton(url, result.tier, result.headline, result.sentences));
+  const meta = make('p', 'meta', `${L().requestId}: `);
+  meta.append(make('span', 'mono', result.requestId));
+  card.append(meta);
+  if (result.tier !== 'low') card.append(makeCopyButton(url, result.tier, result.headline, result.sentences));
   card.append(makeExplainButton(raw));
   return card;
 }
@@ -481,24 +531,24 @@ async function requestAssistant(text: string, image?: string): Promise<AskStatus
 
 function assistantCard(status: AskStatus, raw: string): HTMLElement {
   if (status.status === 'not_checked') {
-    const card = make('div', 'card card--unknown');
+    const card = make('div', 'card');
     card.append(make('p', 'meta card__from', L().assistant));
-    card.append(tierTag('NOT_CHECKED'));
+    card.append(tierHead('not_checked'));
     card.append(make('h2', 'card__headline', L().couldNotCheck));
     card.append(make('p', 'card__sentence', status.reason));
     return card;
   }
   const r: AssistantResult = status.result;
-  const card = make('div', `card ${ASSISTANT_CLASS[r.tier]}`);
+  const card = make('div', 'card');
   card.append(make('p', 'meta card__from', L().assistant));
-  card.append(tierTag(r.tier));
+  card.append(tierHead(ASSISTANT_TO_TIER[r.tier]));
   card.append(make('h2', 'card__headline', r.label));
   if (r.summary) card.append(make('p', 'card__sentence', r.summary));
 
   const why = make('details', 'why');
   why.open = r.tier === 'HIGH' || r.tier === 'MEDIUM';
   why.append(make('summary', undefined, lang === 'ms' ? 'Kenapa' : 'Why'));
-  const list = make('ul');
+  const list = make('ul', 'reasons');
   for (const reason of r.reasons) list.append(make('li', undefined, reason));
   why.append(list);
   if (r.checked.length > 0) why.append(make('p', 'meta', `${L().whatChecked}: ${r.checked.map(checkedLabel).join(', ')}.`));
@@ -523,7 +573,10 @@ function assistantCard(status: AskStatus, raw: string): HTMLElement {
     card.append(chips);
   }
 
-  card.append(make('p', 'meta', `${L().requestId}: ${r.requestId}${r.basis === 'rules_only' ? ` · ${L().rulesOnly}` : ''}`));
+  const meta = make('p', 'meta', `${L().requestId}: `);
+  meta.append(make('span', 'mono', r.requestId));
+  if (r.basis === 'rules_only') meta.append(document.createTextNode(` · ${L().rulesOnly}`));
+  card.append(meta);
   return card;
 }
 

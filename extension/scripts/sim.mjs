@@ -78,6 +78,9 @@ async function buildForSim() {
     await mkdir(path.dirname(path.join(DIST, f)), { recursive: true });
     await cp(path.join(ROOT, 'src', f), path.join(DIST, f));
   }
+  await cp(path.join(ROOT, '..', 'design', 'tokens.css'), path.join(DIST, 'tokens.css'));
+  await cp(path.join(ROOT, 'src', 'fonts.css'), path.join(DIST, 'fonts.css'));
+  await cp(path.join(ROOT, 'src', 'assets', 'fonts'), path.join(DIST, 'fonts'), { recursive: true });
   await build({
     absWorkingDir: ROOT,
     entryPoints: {

@@ -10,7 +10,6 @@ Status: `todo` · `doing` · `blocked` · `done`
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
 | T-036 | Confirm your area in `roles.md` as part of the M0 ownership split | done | | | |
-| T-044 | Build the demo deck: 12 slides with three interactive simulations (chat badges, warning page, assistant panel) in `deck/lantern-demo-deck.html`, plus a refreshed README runbook | done | | | |
 
 ## Shermaine Yap
 
@@ -27,7 +26,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-034 | Implement the backend: API gateway, scoring service, `/risk/link` and agent endpoints; agree the API contract with Fihkri (D-002) | doing | | Fihkri | |
 | T-038 | Decide what runs on the team server and how the backend deploys | done | | | |
 | T-042 | Redeploy the enclave (`./deploy.sh`) to ship the brand/deny-list floors from D-012 | todo | | Shermaine Yap | |
-| T-046 | Redeploy the gateway and verify a first scam returns `new_scam` and an exact repeat returns `known_scam` through the public tunnel (D-015) | todo | | | |
+| T-046 | Redeploy the gateway and verify a first scam returns `new_scam` and an exact repeat returns `known_scam` through the public tunnel (D-016) | todo | | | |
 
 ## Fihkri
 
@@ -36,4 +35,5 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-033 | Scaffold the Chrome MV3 extension: content script, service worker, URL normaliser, warning page, assistant panel | done | | | |
 | T-040 | Wire the extension service worker to `POST /risk/link` per the contract in `server/README.md` (base URL, `NOT_CHECKED` handling, no green on failure). Ask Fahreza for the current tunnel host; raise CORS/origin needs as a task if `host_permissions` is not enough | done | | Fahreza Alghifari | |
 | T-043 | Reload the extension and smoke-test the side panel: a pasted message goes to the Lantern Assistant; a link shows the badge plus "Ask Lantern Assistant to explain" (D-012, D-014) | todo | | Shermaine Yap | |
+| T-044 | Re-theme the warning page and side panel to `design/DESIGN.md`: tokens only, bundled IBM Plex, SVG tier marks, light/dark, reduced motion | done | | | |
 | T-045 | `npm run sim`: 3 checks fail on main (IP-literal `/verify` and `maybank2u.com.my@evil-site.top` expected 🔴, scored 🟡 because their floors are 60/70; the address-bar case follows). Decide: raise those floors to HIGH, or expect MEDIUM in the sim | todo | | Shermaine Yap | |
