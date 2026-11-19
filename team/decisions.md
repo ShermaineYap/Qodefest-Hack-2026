@@ -27,3 +27,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Decision: `team/` follows the roster in the README: williamkee51, Shermaine Yap, Fahreza Alghifari and Fihkri. Sections, logs and tasks for Daniel, Hana and Liaw are removed; they described people who are not on this team and an earlier project scope. Areas not yet assigned stay "to confirm" in `roles.md` until M0.
 - Why: keep `team/` and the README describing the same team, without inventing ownership.
 - Affects: everyone
+
+## D-004 — 2026-11-19 — D-002 stands as currently recorded; append-only from here
+- Decided by: Fihkri
+- Decision: D-002 stands with Fihkri (`irfanfikhri@gmail.com`) as Chrome extension owner and Fahreza Alghifari as backend owner. The current D-002 text supersedes the earlier wording that named Irfan and referenced Hana and Shermaine. Future changes to a decision are added as a new numbered entry, never edited in place.
+- Why: the D-002 edit was committed in 545954f before it could be restored; this records the corrected state without rewriting shared history a second time.
+- Affects: everyone
