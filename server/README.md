@@ -185,8 +185,11 @@ once `/risk/link` is in real use. Do not build product behaviour on it.
 ### Dashboard (`/`)
 
 The tunnel root serves a read-only Next.js dashboard (`dashboard/` in the repo) that polls
-`GET /agent/messages?limit=50` every 5 s from the browser (same origin, so no CORS). No auth. When
+`GET /agent/messages?limit=50` every 5 s from the browser (same origin, so no CORS). No auth. It
+filters by kind and free-text on the client and shows raw payloads in a line-numbered panel. When
 the gateway is unreachable it says so and shows the last rows it received — it never fabricates data.
+Styling uses Tailwind v4 and vendored [Beautiful UI](https://www.beautifului.dev) primitives (MIT;
+see `dashboard/THIRD_PARTY_NOTICES.md`).
 
 ### Not implemented yet — do not assume
 

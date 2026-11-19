@@ -217,7 +217,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | Warning interstitial + navigation hook | Scaffolded; needs manual Chrome test |
 | `/risk/link` | Live at the current tunnel host — see `server/README.md` |
 | Agent endpoint | Dummy `POST /agent/message` logs to SQLite on the gateway; Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
-| Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), no auth |
+| Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), Beautiful UI primitives, no auth |
 | Eval set and gate | Not started |
 
 ---
