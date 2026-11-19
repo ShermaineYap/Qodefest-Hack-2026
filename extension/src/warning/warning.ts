@@ -4,12 +4,42 @@ type Scored = Extract<ScoreStatus, { status: 'scored' }>;
 
 const url = new URLSearchParams(location.search).get('u') ?? '';
 
+// The registrable part of the host is the one a person should read; the rest is muted.
+const TWO_LABEL_SUFFIXES = new Set(['com.my', 'co.uk', 'com.au', 'co.id', 'com.sg', 'co.th']);
+
 function hostOf(raw: string): string {
   try {
     return new URL(raw).hostname || raw;
   } catch {
     return raw;
   }
+}
+
+function registrableLength(labels: string[]): number {
+  if (labels.length < 2) return labels.length;
+  return TWO_LABEL_SUFFIXES.has(labels.slice(-2).join('.')) && labels.length >= 3 ? 3 : 2;
+}
+
+function renderDomain(raw: string): void {
+  const host = hostOf(raw);
+  const labels = host.split('.').filter((label) => label.length > 0);
+  if (labels.length === 0) {
+    domain.textContent = host;
+    return;
+  }
+  const keep = registrableLength(labels);
+  const rest = labels.slice(0, labels.length - keep).join('.');
+  if (rest.length > 0) {
+    domain.append(document.createTextNode(`${rest}.`), makeStrong(labels.slice(-keep).join('.')));
+  } else {
+    domain.append(makeStrong(host));
+  }
+}
+
+function makeStrong(text: string): HTMLElement {
+  const strong = document.createElement('strong');
+  strong.textContent = text;
+  return strong;
 }
 
 function byId(id: string): HTMLElement {
@@ -41,7 +71,7 @@ function isScored(value: unknown): value is Scored {
   );
 }
 
-domain.textContent = hostOf(url);
+renderDomain(url);
 
 function applyResult(response: Scored): void {
   const result = response.result;

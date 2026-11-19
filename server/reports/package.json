@@ -1,0 +1,14 @@
+{
+  "name": "lantern-daily-report",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "report": "node report.mjs"
+  },
+  "dependencies": {
+    "@qoder-ai/qoder-agent-sdk": "^1.0.59"
+  }
+}

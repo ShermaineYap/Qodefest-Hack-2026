@@ -2,6 +2,11 @@
 
 Newest first. Only Fihkri's agent writes here.
 
+## 2026-11-19 14:19 +08
+- Did: Re-themed the warning page and the side panel to `design/DESIGN.md` (T-044). Both surfaces now import `design/tokens.css` (copied into `dist/`) and only use tokens — no hex in components. Bundled IBM Plex Sans/Mono woff2 (OFL) via `src/fonts.css`, nothing fetched at runtime. Replaced emoji with SVG tier marks (circle-check, triangle-bang, octagon-bang, dashed circle, pulsing dots) plus "Looks safe / Be careful / Likely scam / Not checked" labels; flat cards, one solid primary per area, quiet underlined "Continue anyway", muted meta with mono request id, 44px targets, 16px body, light/dark and reduced-motion styles. The warning page bolds the registrable part of the host (multi-part suffixes like `.com.my` handled). Panel copy is now "Check this link". Extended `scripts/build.mjs` and `scripts/sim.mjs` to ship tokens/fonts. Verified typecheck, 29 unit tests, build, sim 16/16, and dark/light screenshots.
+- Next: T-043 once the panel is smoke-tested against the live gateway; content-script badges still use emoji and are the next surface to bring onto the design system.
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 14:05 +08
 - Did: Renamed the remaining "Link Guard" references to Lantern (D-006/D-012): warning-page title/eyebrow/fallback copy, the content-script notice and console prefix, the mock-api banner, the extension README, and the npm package (`lantern-extension` in `package.json`/`package-lock.json`). Manifest and side panel were already renamed upstream. Verified typecheck, 29 unit tests, build, and the Playwright sim 16/16.
 - Next: T-043 once T-041 (assistant deploy) is live; commit the local sim harness and its playwright dev dependency when the user is ready.

@@ -7,6 +7,8 @@ const outdir = 'dist';
 
 const staticFiles = [
   ['src/manifest.json', 'manifest.json'],
+  ['../design/tokens.css', 'tokens.css'],
+  ['src/fonts.css', 'fonts.css'],
   ['src/warning/warning.html', 'warning/warning.html'],
   ['src/warning/warning.css', 'warning/warning.css'],
   ['src/panel/panel.html', 'panel/panel.html'],
@@ -19,6 +21,7 @@ async function copyStatic() {
     await mkdir(path.dirname(dest), { recursive: true });
     await cp(from, dest);
   }
+  await cp('src/assets/fonts', path.join(outdir, 'fonts'), { recursive: true });
 }
 
 const options = {
