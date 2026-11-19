@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Link Guard",
+  "version": "0.1.0",
+  "description": "Reads the link before she does.",
+  "minimum_chrome_version": "116",
+  "permissions": ["sidePanel", "webNavigation", "tabs"],
+  "host_permissions": ["http://localhost:4000/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Link Guard"
+  },
+  "side_panel": {
+    "default_path": "panel/panel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://web.telegram.org/*",
+        "https://www.messenger.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
