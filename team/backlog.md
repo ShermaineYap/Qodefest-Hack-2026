@@ -29,7 +29,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-042 | Redeploy the enclave (`./deploy.sh`) to ship the brand/deny-list floors from D-012 | todo | | Shermaine Yap | |
 | T-046 | Redeploy the gateway and verify a first scam returns `new_scam` and an exact repeat returns `known_scam` through the public tunnel (D-016) | todo | | | |
 | T-047 | Admin console: token-gated `POST /agent/admin/chat` (read-only SQL guardrails, summary fallback) and `/console` chat page (D-017) | done | | | |
-| T-048 | Fix `/agent/message` on the live deployment: it answers `503 {"detail":"agent_unavailable"}` (checked 2026-11-19), so the assistant panel can only show NOT CHECKED. Check `LLM_API_KEY` / `LLM_BASE_URL` inside the container and the model call itself; a failed key should be obvious before a demo. Verified locally that the same code answers from the keyword mock with no key | todo | | williamkee51 | before demo |
+| T-048 | Fix `/agent/message` on the live deployment: it answered `503 {"detail":"agent_unavailable"}` earlier on 2026-11-19, so the assistant panel could only show NOT CHECKED. Fixed by Fahreza's redeploy before this was pushed — the endpoint now returns `201` from the keyword mock (no model key configured), so the assistant demo works on the tunnel | done | | williamkee51 | |
 
 ## Fihkri
 

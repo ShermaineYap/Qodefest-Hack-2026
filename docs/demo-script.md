@@ -29,9 +29,11 @@ is configured.
      -d '{"v":1,"client":"preflight","kind":"chat","text":"Your account is suspended. Verify now."}'
    ```
 
-   `201` means the model (or its mock) answers. A `503 {"detail":"agent_unavailable"}` means the
-   deployed model is failing — use the local gateway below, or ask Fahreza to fix the key (T-048).
-   With 503 the panel honestly shows NOT CHECKED, which is not the demo you want.
+   `201` means the assistant path works. Check `"model"` in the reply: `"mock"` means no model key
+   is configured and the answers are the fixed keyword replies below; `qwen4-max` (or similar) means
+   a real model writes them, so wording varies and a call can take several seconds. A
+   `503 {"detail":"agent_unavailable"}` means the endpoint is failing — use the local gateway below.
+   Re-check this after any redeploy.
 4. `cd extension && npm run sim` — expect the 15 badge and warning checks to pass. Setup once:
    `npm install && npx playwright install chromium`. Two known issues: the side-panel leg times out
    because the chat redesign removed `#result` (T-050), and the sim's mock treats userinfo and
@@ -83,19 +85,24 @@ before the audience (T-043). Content scripts match `web.whatsapp.com`, `web.tele
 ## Act 3 — the assistant panel (side panel, ~90 s)
 
 Open the side panel. Paste each message; a message with a link gets a badge card and an
-**Ask Lantern Assistant to explain** button. Replies below are the verified mock output.
+**Ask Lantern Assistant to explain** button. The **verdict** is the demo point; exact wording
+depends on whether the tunnel runs the keyword mock or a model. Mock replies are quoted exactly;
+model answers are paraphrased from a verified run on 2026-11-19.
 
-| Paste this | Link result | Assistant says |
+| Paste this | Link result | Expected answer |
 |---|---|---|
-| Hi, are we still meeting for lunch at 1? I will send the location later. | — | Not a scam. "I didn't find scam signals in this message, but stay careful: never share passwords or OTPs." |
-| Is this the official LHDN portal? `https://www.lhdn.gov.my/` | 🟢 LOW 0 | Not a scam. Same reply. |
+| Hi, are we still meeting for lunch at 1? I will send the location later. | — | **Not a scam.** "I didn't find scam signals in this message, but stay careful: never share passwords or OTPs." |
+| Is this the official LHDN portal? `https://www.lhdn.gov.my/` | 🟢 LOW 0 | **Not a scam.** Same mock reply. |
 | My parcel is delayed. Is this tracking link normal? `https://www.poslaju.com.my/track` | 🟢 LOW 0 | **Unsure.** "I can't be sure from this message. Verify the sender with an official number or app before you act." (`mentions 'parcel'`) |
-| I got a refund notice by email, not sure if it is real. | — | **Unsure.** Same reply (`mentions 'refund'`). |
-| Your Maybank account is suspended. Verify within 24 hours: `https://maybank2u-secure-login.xyz/login` | 🔴 HIGH 85 | Scam. "This has clear signs of a scam. Don't reply, don't click any links, and don't share passwords, OTPs or bank details." (`bank`, `suspended`, `verify`) |
-| Can you check this Google sign-in? `https://accounts.google.com/` | 🟢 LOW 0 | Not a scam. |
+| I got a refund notice by email, not sure if it is real. | — | **Unsure.** Model: don't click links or share card details; check the refund by logging in yourself or calling the number on your bill. |
+| Your Maybank account is suspended. Verify within 24 hours: `https://maybank2u-secure-login.xyz/login` | 🔴 HIGH 85 | **Scam.** Model: fake Maybank message; don't click or enter anything; delete it and call the number on your card. Reasons name the lookalike address and the 24-hour pressure. |
+| Can you check this Google sign-in? `https://accounts.google.com/` | 🟢 LOW 0 | **Not a scam.** Model: real Google address, but open it by typing it yourself; never share a password or a texted code. |
 
 The third row is the point of the act: the **address is clean and the message is still uncertain**.
 A good demo answer is not always red.
+
+If a model call is slow, the panel times out after 22 s and shows NOT CHECKED — press the ask button
+again. If you want a deterministic, instant demo, run the local gateway (mock mode) below.
 
 Also expand **What leaves this device** on a link card, and read one `request id` out loud — the
 ledger is the proof that the verdict came from somewhere.
