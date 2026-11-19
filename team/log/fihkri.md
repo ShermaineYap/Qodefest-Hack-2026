@@ -3,8 +3,8 @@
 Newest first. Only Fihkri's agent writes here.
 
 ## 2026-11-19 14:05 +08
-- Did: Renamed the remaining "Link Guard" references to Lantern (D-006/D-012): warning-page title/eyebrow/fallback copy, the content-script notice and console prefix, the mock-api banner and the extension README. Manifest and side panel were already renamed upstream. The npm package is now `lantern-extension` in `package.json`/`package-lock.json`, left uncommitted with the user's pending sim-harness files. Verified typecheck, 29 unit tests, build, and the Playwright sim 16/16.
-- Next: T-043 once T-041 (assistant deploy) is live; commit the sim harness and package rename when the user is ready.
+- Did: Renamed the remaining "Link Guard" references to Lantern (D-006/D-012): warning-page title/eyebrow/fallback copy, the content-script notice and console prefix, the mock-api banner, the extension README, and the npm package (`lantern-extension` in `package.json`/`package-lock.json`). Manifest and side panel were already renamed upstream. Verified typecheck, 29 unit tests, build, and the Playwright sim 16/16.
+- Next: T-043 once T-041 (assistant deploy) is live; commit the local sim harness and its playwright dev dependency when the user is ready.
 - Blocked on / needs from others: T-043 waits on T-041 (Shermaine).
 
 ## 2026-11-19 13:45 +08
