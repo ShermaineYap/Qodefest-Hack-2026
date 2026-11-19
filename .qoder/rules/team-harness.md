@@ -22,6 +22,11 @@ The files under `team/` are how we stay in step. Follow this protocol in every s
 
 ## 2. While working
 
+- **Pull before every new change**, not only at session start: run `git pull --rebase` before you start editing for each new request.
+  Several people and agents push here all day, so the copy you pulled earlier may already be out of date.
+  - If the pull fails because of local changes, stop and tell the user. Never stash, reset or discard work.
+  - If it brings in changes to files you are about to edit, re-read those files first.
+  - Never undo edits with `git checkout -- <file>` or `git restore`. Another agent may be editing the same working tree.
 - **Stay in your lane.** Edit only the user's own section of `team/backlog.md` and their own `team/log/<name>.md`.
   Code and docs: prefer the areas the user owns in `team/roles.md`; if a change touches another member's area, say so before making it.
 - **Need someone else?** Add a task to *their* section with `requested-by: <user>` — that is the one allowed edit outside your own section. Never change status or text of someone else's existing tasks.
