@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CodeBlock from "@/components/beautiful-ui/CodeBlock";
 import LoadingState from "@/components/beautiful-ui/LoadingState";
 import { Button } from "@/components/beautiful-ui/Button";
+import { Chip } from "@/components/beautiful-ui/Chip";
 import { EntityChip } from "@/components/beautiful-ui/EntityChip";
 import { StatusPill } from "@/components/beautiful-ui/StatusPill";
 import { FilterChips } from "@/components/ui/FilterChips";
@@ -17,6 +18,12 @@ const KIND_META = {
   chat: { tone: "accent", dot: "var(--accent)", label: "Chat" },
   link: { tone: "green", dot: "var(--green)", label: "Link" },
   panel: { tone: "orange", dot: "var(--orange)", label: "Panel" },
+};
+
+const STATUS_META = {
+  scam: { tone: "red", label: "Scam" },
+  not_scam: { tone: "green", label: "Not scam" },
+  unsure: { tone: "orange", label: "Not sure" },
 };
 
 const CLIENT_COLORS = ["#5b8def", "#e08a3c", "#25a878", "#a06de0", "#d0568b"];
@@ -45,7 +52,7 @@ function formatTime(iso) {
 }
 
 const COLUMNS =
-  "grid-cols-[56px_164px_150px_120px_minmax(0,1fr)_210px_44px]";
+  "grid-cols-[56px_164px_140px_110px_120px_minmax(0,1fr)_190px_44px]";
 
 export default function Dashboard() {
   const [messages, setMessages] = useState([]);
@@ -118,7 +125,7 @@ export default function Dashboard() {
     return messages.filter((message) => {
       if (kindFilter !== "all" && (message.kind || "(none)") !== kindFilter) return false;
       if (!needle) return true;
-      return [message.text, message.url, message.client, message.kind]
+      return [message.text, message.url, message.client, message.kind, message.reply, ...(message.reasons ?? [])]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(needle));
     });
@@ -145,7 +152,7 @@ export default function Dashboard() {
                   Lantern
                 </h1>
                 <p className="mt-0.5 text-[13px] text-ink-2">
-                  Message log — what the extension sent. Read-only, newest first.
+                  Message log — what the extension sent and what the checker answered. Read-only, newest first.
                 </p>
               </div>
             </div>
@@ -237,7 +244,7 @@ export default function Dashboard() {
               tabIndex={0}
               style={{ scrollbarWidth: "none" }}
             >
-              <div className="min-w-[980px]">
+              <div className="min-w-[1160px]">
                 <div
                   className={`grid ${COLUMNS} border-b border-line bg-inset/40 text-[11.5px] font-medium uppercase tracking-[0.08em] text-ink-3`}
                 >
@@ -245,6 +252,7 @@ export default function Dashboard() {
                   <span className="border-r border-[var(--grid-line)] px-3 py-2.5">Received</span>
                   <span className="border-r border-[var(--grid-line)] px-3 py-2.5">Client</span>
                   <span className="border-r border-[var(--grid-line)] px-3 py-2.5">Kind</span>
+                  <span className="border-r border-[var(--grid-line)] px-3 py-2.5">Status</span>
                   <span className="border-r border-[var(--grid-line)] px-3 py-2.5">Text</span>
                   <span className="border-r border-[var(--grid-line)] px-3 py-2.5">URL</span>
                   <span className="px-3 py-2.5">
@@ -261,6 +269,7 @@ export default function Dashboard() {
 
                 {visible.map((message) => {
                   const meta = kindMeta(message.kind);
+                  const statusInfo = STATUS_META[message.status];
                   const expanded = expandedId === message.id;
                   const payloadText = JSON.stringify(message.payload, null, 2);
                   return (
@@ -288,10 +297,22 @@ export default function Dashboard() {
                         <span className="flex items-center border-r border-[var(--grid-line)] px-3 py-2.5">
                           {meta ? <StatusPill tone={meta.tone}>{meta.label}</StatusPill> : <span className="text-ink-3">—</span>}
                         </span>
-                        <span className="flex min-w-0 items-center border-r border-[var(--grid-line)] px-3 py-2.5">
+                        <span className="flex items-center border-r border-[var(--grid-line)] px-3 py-2.5">
+                          {statusInfo ? (
+                            <StatusPill tone={statusInfo.tone}>{statusInfo.label}</StatusPill>
+                          ) : (
+                            <span className="text-ink-3">—</span>
+                          )}
+                        </span>
+                        <span className="flex min-w-0 flex-col justify-center gap-0.5 border-r border-[var(--grid-line)] px-3 py-2">
                           <span className="min-w-0 truncate text-ink" title={message.text || undefined}>
                             {message.text || <span className="text-ink-3">—</span>}
                           </span>
+                          {message.reply && (
+                            <span className="min-w-0 truncate text-[12px] text-ink-3" title={message.reply}>
+                              {message.reply}
+                            </span>
+                          )}
                         </span>
                         <span className="flex min-w-0 items-center border-r border-[var(--grid-line)] px-3 py-2.5">
                           <span
@@ -334,6 +355,32 @@ export default function Dashboard() {
                           className="border-b border-[var(--grid-line)] bg-inset/50 p-3"
                           style={{ animation: "fade-in 180ms ease-out both" }}
                         >
+                          {(message.status || message.reply) && (
+                            <div className="mb-2 rounded-card bg-surface p-3 shadow-hairline">
+                              <div className="flex flex-wrap items-center gap-2">
+                                {statusInfo ? (
+                                  <StatusPill tone={statusInfo.tone}>{statusInfo.label}</StatusPill>
+                                ) : (
+                                  <StatusPill tone="neutral">No verdict</StatusPill>
+                                )}
+                                {message.model && <Chip>{message.model}</Chip>}
+                              </div>
+                              {message.reply && (
+                                <p className="mt-2 text-[13px] leading-relaxed text-ink-2">
+                                  {message.reply}
+                                </p>
+                              )}
+                              {(message.reasons ?? []).length > 0 && (
+                                <ul className="mt-2 flex flex-wrap gap-1.5">
+                                  {message.reasons.map((reason) => (
+                                    <li key={reason}>
+                                      <Chip tone="orange">{reason}</Chip>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          )}
                           <CodeBlock
                             filename={`message-${message.id}.json`}
                             lines={payloadText.split("\n")}

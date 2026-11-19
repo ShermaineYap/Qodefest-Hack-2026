@@ -130,9 +130,9 @@ The extension also applies its own on-device floors to the server verdict (worst
 
 ### `POST /agent/message`
 
-**Dummy endpoint, no agent yet.** Stores one message from the extension (or curl) in SQLite
-(`/srv/data/messages.db` on the team server) and returns its log id. It does not call a model and
-does not answer; the real agent endpoint will replace this behaviour.
+Accepts one message from the extension (text and/or a screenshot), asks the configured model
+whether it looks like a scam, stores the message with the verdict, and returns the verdict and
+reply in the same call.
 
 Request (all fields optional; unknown fields are kept in the stored payload):
 
@@ -143,20 +143,49 @@ Request (all fields optional; unknown fields are kept in the stored payload):
   "kind": "chat",
   "text": "why does this site ask for my IC number?",
   "url": "https://example.com/login",
-  "ts": "2026-11-19T06:00:00Z"
+  "ts": "2026-11-19T06:00:00Z",
+  "image": "data:image/png;base64,…"
 }
 ```
 
-Limits: `text` ≤ 8000 chars, `url` ≤ 2048 chars. Response `201`:
+Limits: `text` ≤ 8000 chars, `url` ≤ 2048 chars, `image` ≤ ~4.5 MB as a `png`, `jpeg` or `webp`
+data URL. Remote image URLs are rejected. The image is sent to the model but never stored — the log
+keeps only its mime type and size.
+
+Response `201`:
 
 ```json
-{ "id": 1, "received_at": "2026-11-19T05:44:53+00:00" }
+{
+  "id": 1,
+  "received_at": "2026-11-19T05:44:53+00:00",
+  "status": "scam",
+  "reply": "This has clear signs of a scam. Don't reply, don't click any links, and don't share passwords, OTPs or bank details.",
+  "reasons": ["mentions 'otp'", "asks for a payment", "mentions 'click'"],
+  "model": "qwen-plus"
+}
 ```
+
+| `status` | Meaning | Client copy |
+|---|---|---|
+| `scam` | Clear scam signals | Treat as dangerous; one primary action (go back / don't reply) |
+| `not_scam` | No scam signals found — never "guaranteed safe" | Stay careful anyway |
+| `unsure` | Not enough evidence, or the answer was unusable | Verify the sender elsewhere |
+
+Fail-closed: if the model is unreachable, times out (`AGENT_TIMEOUT`, default 20 s) or returns
+unusable output, the gateway answers **`503`** (`{"detail": "agent_unavailable"}`) and stores
+nothing. On any other non-2xx the client must show **NOT CHECKED**, never a guessed verdict.
+
+**Mock mode.** With no `LLM_API_KEY` set, the endpoint runs a deterministic keyword mock
+(`"model": "mock"`) so clients can integrate. Replace it by setting `LLM_API_KEY` (and optionally
+`LLM_BASE_URL`, `LLM_MODEL`, `LLM_VISION_MODEL`) in `/srv/.env` and redeploying. Defaults target
+Qwen's OpenAI-compatible endpoint (`qwen-plus`; screenshots: `qwen-vl-plus`), so any
+OpenAI-compatible provider works by changing `LLM_BASE_URL` and the model names. Keys never go in
+the repo.
 
 ### `GET /agent/messages`
 
 Read back what was stored, newest first. `?limit=` 1–100 (default 20). Each row includes the full
-stored payload:
+stored payload (with the image reduced to `{mime, chars}`) and its analysis:
 
 ```json
 [
@@ -167,14 +196,19 @@ stored payload:
     "kind": "chat",
     "text": "why does this site ask for my IC number?",
     "url": "https://example.com/login",
+    "status": "scam",
+    "reply": "This has clear signs of a scam. …",
+    "reasons": ["mentions 'otp'"],
+    "model": "qwen-plus",
     "payload": { "v": 1, "client": "extension", "kind": "chat", "text": "…", "url": "…", "ts": "…" }
   }
 ]
 ```
 
 Storage is a single SQLite table (`messages`: `id`, `received_at`, `client`, `kind`, `text`, `url`,
-`payload` as JSON). The file lives on the host at `/srv/data/` (bind-mounted to `/data` in the
-gateway container), so it survives rebuilds. This is deliberately temporary; see D-009.
+`payload`, `status`, `reply`, `reasons`, `model`). The file lives on the host at `/srv/data/`
+(bind-mounted to `/data` in the gateway container), so it survives rebuilds. Columns added after the
+first deploy are migrated in place at startup; see D-009 and D-013.
 
 
 ### `GET /api/ping`
@@ -194,13 +228,14 @@ see `dashboard/THIRD_PARTY_NOTICES.md`).
 ### Not implemented yet — do not assume
 
 - **Server-side re-redaction.** The payload is already redacted by the extension; the enclave does
-  not currently strip anything else from `host`/`pathShape`.
-- **Models / verifier.** No classifier, no cross-verification, no MEDIUM "held for review" logic.
-- **A real agent endpoint.** `POST /agent/message` only stores messages in SQLite and returns the log
-  id — it does not answer. Any other `/agent*` path 404s at the gateway. The separate Ask SHOU agent
-  API is described in `docs/ask-shou-api.md` and served by `server/index.ts` (local :8787, Vercel in
-  production) — it is not part of this compose stack yet. Contract will be agreed before M2.
-- **Database beyond message logging.** One SQLite table, no migrations; no auth on `GET /agent/messages`.
+  not currently strip anything else from `host`/`pathShape`. `/agent/message` stores whatever text
+  the client sends — redact before it leaves the browser.
+- **Models / verifier on links.** `/risk/link` is still deterministic rules only.
+- **Agent conversation.** `/agent/message` is one model call per message: no streaming, no multi-turn
+  history, no tools, no follow-up chips. The separate Ask SHOU agent API (`docs/ask-shou-api.md`,
+  `server/index.ts`, :8787/Vercel) is still not part of this compose stack.
+- **Auth / rate limits on the message endpoint.** None yet; anyone with the tunnel URL can spend
+  model tokens. Add a shared secret and rate limit before publicising the host.
 - **Deny-list, brand-token, domain-age, redirect rules.** Only the five flag-based rules above exist.
 - **CORS / origin allow-list.** No CORS headers are configured. A Manifest V3 service worker calling
   this host with `host_permissions: ["https://<tunnel-host>/*"]` does not need CORS; if the
@@ -252,8 +287,11 @@ cd /srv
 
 - Services: `gateway`, `enclave`, `proxy` (nginx), `tunnel` (cloudflared quick tunnel), `web`
   (Next.js message-log dashboard).
-- Dummy agent messages persist in `/srv/data/messages.db` (bind-mounted to `/data` in the gateway),
-  so they survive rebuilds. Back it up or delete it freely; there is no migration tooling.
+- Messages and their verdicts persist in `/srv/data/messages.db` (bind-mounted to `/data` in the
+  gateway), so they survive rebuilds. Back it up or delete it freely; columns are added in place.
+- Model settings live in `/srv/.env` (read by Docker Compose, never committed):
+  `LLM_API_KEY=…` plus optional `LLM_BASE_URL`, `LLM_MODEL`, `LLM_VISION_MODEL`, `AGENT_TIMEOUT`.
+  Without a key the message endpoint answers with `"model": "mock"`.
 - No inbound HTTP ports are open; only SSH is allowed by ufw. All public traffic arrives through the
   outbound quick tunnel.
 - The quick-tunnel hostname is **ephemeral** and changes whenever `app-tunnel-1` restarts. Get it:
@@ -295,11 +333,17 @@ curl -s -X POST -H 'Content-Type: application/json' \
 curl -s -o /dev/null -w '%{http_code}\n' "$BASE/score"
 # -> 404: the enclave is not publicly routed
 
-# Dummy agent log: store one message, then read it back
+# Message check: store one message, get status scam | not_scam | unsure
 curl -s -X POST -H 'Content-Type: application/json' \
-  -d '{"v":1,"client":"curl","kind":"chat","text":"hello"}' "$BASE/agent/message"
-# -> {"id":1,"received_at":"..."}
+  -d '{"v":1,"client":"curl","kind":"chat","text":"Your account is blocked. Send the OTP now."}' \
+  "$BASE/agent/message"
+# -> {"id":1,"status":"scam","reply":"…","reasons":[…],"model":"mock|qwen-plus",…}
 curl -s "$BASE/agent/messages?limit=5"
+
+# Screenshot input (tiny 1x1 png; accepted, answered by the vision model when configured)
+curl -s -X POST -H 'Content-Type: application/json' \
+  -d '{"v":1,"text":"is this legit?","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="}' \
+  "$BASE/agent/message"
 ```
 
 ## Layout

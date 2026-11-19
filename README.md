@@ -207,7 +207,7 @@ Page-content inspection (forms, brand assets, screenshots) is deliberately **v1.
 
 ## Status
 
-This repository is the main workspace for Qodefest Hack 2026. The extension is scaffolded (T-033), the scoring API `/risk/link` is deployed and live behind a Cloudflare quick tunnel (contract v0.1 in [`server/README.md`](server/README.md)), and Ask SHOU v1 lives in `server/index.ts` (Vercel/local, not yet in the Docker stack).
+This repository is the main workspace for Qodefest Hack 2026. The extension is scaffolded (T-033), the scoring API `/risk/link` is deployed and live behind a Cloudflare quick tunnel (contract v0.1 in [`server/README.md`](server/README.md)), the gateway's `POST /agent/message` returns a model-backed scam verdict (mock until a key is set), and Ask SHOU v1 lives in `server/index.ts` (Vercel/local, not yet in the Docker stack).
 
 | Area | State |
 |---|---|
@@ -216,7 +216,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | URL normaliser + deterministic rules | Done (extension on-device; server re-derives from flags) |
 | Warning interstitial + navigation hook | Scaffolded; needs manual Chrome test |
 | `/risk/link` | Live at the current tunnel host — see `server/README.md` |
-| Agent endpoint | Dummy `POST /agent/message` logs to SQLite on the gateway; Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
+| Agent endpoint | `POST /agent/message` on the gateway checks text and/or a screenshot with an OpenAI-compatible model and returns `scam` \| `not_scam` \| `unsure` + reply; stored in SQLite; keyword mock until `LLM_API_KEY` is set. Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
 | Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), Beautiful UI primitives, no auth |
 | Eval set and gate | Not started |
 

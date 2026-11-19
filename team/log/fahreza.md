@@ -2,6 +2,11 @@
 
 Newest first. Only Fahreza's agent writes here.
 
+## 2026-11-19 05:58
+- Did: Turned `POST /agent/message` into a real check (D-013): text and/or screenshot goes to an OpenAI-compatible model, which returns `status` scam | not_scam | unsure, `reply`, `reasons`, `model`; the verdict is stored in SQLite via in-place column migration. Fail-closed `503 agent_unavailable` on model errors or unusable output, and nothing is stored. Screenshots accepted as png/jpeg/webp data URLs and never stored. Deterministic keyword mock runs when no key. 9 gateway tests pass. Dashboard rows now show a status pill and reply, with reasons/model in the expanded panel. Updated `server/README.md` and compose env.
+- Next: set `LLM_API_KEY` in `/srv/.env` and redeploy to leave mock mode; then settle with Fihkri/Shermaine which client path calls this endpoint (`/agent/message` here vs the separate Ask SHOU `/api/agent/chat`).
+- Blocked on / needs from others: nothing.
+
 ## 2026-11-19 05:49
 - Did: Replaced the placeholder page with a read-only dashboard at `/` (D-011): Next.js app in `dashboard/`, newest-first message table with expandable payloads, 5 s auto-refresh, explicit gateway-down state with no fabricated data. No new API — it polls `GET /agent/messages`. Updated compose to build `./repo/dashboard`, root README and `server/README.md`. Verified through the tunnel: root 200 with expected markup, JS chunks 200, messages endpoint 200. No browser on the host, so verification was HTTP-level only.
 - Next: T-034 — remaining rules, model fusion/verifier, real agent endpoint (replaces the SQLite stub).

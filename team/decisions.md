@@ -82,3 +82,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Why: the panel previously rejected anything without a link, and the server alone still scored the demo Maybank lookalike LOW.
 - Affects: Fihkri (panel, service worker, manifest renamed to Lantern), Fahreza Alghifari (enclave rules; redeploy with `./deploy.sh`)
 
+## D-013 — 2026-11-19 — `/agent/message` checks the message with a model
+- Decided by: Fahreza Alghifari
+- Decision: `POST /agent/message` no longer only stores: it sends the text and/or screenshot to an OpenAI-compatible chat-completions model and returns `{id, received_at, status: scam|not_scam|unsure, reply, reasons, model}` with HTTP 201, storing the verdict alongside the message. Screenshots must be `data:` URLs (png/jpeg/webp, ≤~4.5 MB); the bytes go to the model but only `{mime, chars}` is stored. The model must answer with a strict JSON object (`status`, `reply`, `reasons`); unusable output, an unreachable model or a timeout (`AGENT_TIMEOUT`, default 20 s) answers `503 {"detail":"agent_unavailable"}` and stores nothing. With no `LLM_API_KEY` the endpoint runs a deterministic keyword mock (`"model":"mock"`) so clients can integrate today. Config lives in `/srv/.env` only (never committed): `LLM_API_KEY`, optional `LLM_BASE_URL`, `LLM_MODEL` (default `qwen-plus`), `LLM_VISION_MODEL` (default `qwen-vl-plus`). The dashboard shows status, reply, reasons and model per row.
+- Why: the front end needs a real verdict and reply now; a strict status enum plus fail-closed 503 keeps the client from ever showing a guessed "safe".
+- Affects: Fihkri / Shermaine (client reads `status`, `reply`, `reasons` from the 201; any 503 is NOT CHECKED, never green), Fahreza Alghifari (model config in `/srv/.env`)
+

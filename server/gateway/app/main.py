@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 
+from app.agent import AgentUnavailable, analyze
 from app.client import EnclaveClient, EnclaveUnavailable
 from app.config import settings
 from app.db import init_db, insert_message, list_messages
@@ -41,11 +42,16 @@ async def risk_link(payload: RedactedPayload) -> Verdict:
         raise HTTPException(status_code=503, detail="enclave_unavailable")
 
 
-# Dummy agent endpoint: store what the extension sends, no agent call yet.
+# Message check: one model call (text or screenshot), stored with its verdict.
+# Fail-closed: if the model is unreachable the client gets 503, not a made-up answer.
 @app.post("/agent/message", response_model=StoredMessage, status_code=201)
-def agent_message(message: AgentMessage) -> StoredMessage:
+async def agent_message(message: AgentMessage) -> StoredMessage:
+    try:
+        analysis = await analyze(message)
+    except AgentUnavailable:
+        raise HTTPException(status_code=503, detail="agent_unavailable")
     received_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    return insert_message(settings.db_path, message, received_at)
+    return insert_message(settings.db_path, message, analysis, received_at)
 
 
 @app.get("/agent/messages")
