@@ -1,0 +1,23 @@
+{
+  "name": "link-guard-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Link Guard - Chrome MV3 extension (Qodefest Hack 2026)",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "mock-api": "node scripts/mock-api.mjs"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^22.10.2",
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.2"
+  }
+}

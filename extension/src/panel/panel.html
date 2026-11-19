@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link Guard</title>
+    <link rel="stylesheet" href="./panel.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <header class="panel__header">
+        <h1>Link Guard</h1>
+        <p class="muted">Check a link before you open it.</p>
+      </header>
+
+      <form class="input-group" novalidate>
+        <label class="field-label" for="input">Paste the link or the message</label>
+        <textarea
+          id="input"
+          rows="4"
+          placeholder="For example: maybank-secure-login.xyz/login"
+          spellcheck="false"
+          autocomplete="off"
+        ></textarea>
+        <button id="check" type="button">Check this link</button>
+        <p id="input-error" class="error" role="alert" hidden></p>
+      </form>
+
+      <details id="redaction" class="redaction" hidden>
+        <summary>What leaves this device</summary>
+        <ul id="redaction-list"></ul>
+      </details>
+
+      <section id="result" class="result" aria-live="polite"></section>
+
+      <footer class="panel__footer">
+        <p class="muted">Nothing is saved. Closing this panel forgets everything.</p>
+      </footer>
+    </main>
+    <script type="module" src="./panel.js"></script>
+  </body>
+</html>

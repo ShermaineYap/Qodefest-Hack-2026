@@ -1,10 +1,10 @@
-# Qodefest Hack 2026 · Link Guard
+# Qodefest Hack 2026 · Lantern
 
 **A browser extension that reads the link before she does — and an agentic chat box that explains what it found.**
 
 Chrome Manifest V3 · TypeScript · on-device redaction · enclave scoring · bounded AI agent
 
-Team: **williamkee51 · Shermaine Yap · Fahreza Alghifari · Fihkri** · Qodefest Hack 2026
+Team **Pattaya Fried Rice** · williamkee51 · Shermaine Yap · Fahreza Alghifari · Fihkri · Qodefest Hack 2026
 
 ---
 
@@ -31,7 +31,7 @@ The guard is passive: no copy-pasting, no button to press. The assistant is acti
 - **Older adults absorb a disproportionate share of the loss** — under 10% of victims but nearly 28% of total scam losses, including over RM1.47B in investment scams alone, coordinated mainly through chat apps.
 - **Blocklists are necessary and late.** A newly registered lookalike domain can be live and convincing for hours before any feed catches it. The conversation that delivered it is visible immediately, and that context is what a plain blocklist throws away.
 
-**Why not just Safe Browsing?** Keep it — a blocklist hit is a hard HIGH. But a blocklist cannot explain *why*, cannot use the conversation that delivered the link, and cannot slow a decision down without the red page people have been trained to click through. Link Guard adds context, explanation and consequence.
+**Why not just Safe Browsing?** Keep it — a blocklist hit is a hard HIGH. But a blocklist cannot explain *why*, cannot use the conversation that delivered the link, and cannot slow a decision down without the red page people have been trained to click through. Lantern adds context, explanation and consequence.
 
 ---
 
@@ -71,12 +71,12 @@ Someone you trust can help you check it first.
 
 ```
 ┌──────────────────────────────────────────────────┐
-│  Link Guard Assistant                            │
+│  Lantern Assistant                               │
 │                                                  │
 │  You: is this link safe?                         │
 │       maybank-secure-login.xyz/login             │
 │                                                  │
-│  Guard: 🔴 Likely a scam                         │
+│  Lantern: 🔴 Likely a scam                       │
 │                                                  │
 │  • The address is not maybank.com.my             │
 │  • The page asks for your bank login             │

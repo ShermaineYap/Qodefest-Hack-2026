@@ -1,8 +1,8 @@
-# Roles — TEAM WEB 1.5
+# Roles — Pattaya Fried Rice
 
 | Member | Log | Git email | Role | Owns |
 | --- | --- | --- | --- | --- |
-| williamkee51 | `log/williamkee51.md` | williamkee51@gmail.com | _(to confirm at M0)_ | _(to confirm at M0)_ |
+| williamkee51 | `log/williamkee51.md` | williamkee51@gmail.com | Lead | Overall direction, review and management of the project |
 | Shermaine Yap | `log/shermaine.md` | sysm1410@gmail.com | _(to confirm at M0)_ | _(to confirm at M0)_ |
 | Fahreza Alghifari | `log/fahreza.md` | fahreza@express.ai | Backend | API gateway, scoring and agent endpoints, backend deployment |
 | Fihkri (Irfan) | `log/fihkri.md` | irfanfikhri@gmail.com | Chrome extension | Content script, service worker, URL normaliser, warning page, assistant panel |

@@ -9,7 +9,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
-| T-036 | Confirm your area in `roles.md` as part of the M0 ownership split | todo | | | |
+| T-036 | Confirm your area in `roles.md` as part of the M0 ownership split | done | | | |
 
 ## Shermaine Yap
 
@@ -29,4 +29,4 @@ Status: `todo` · `doing` · `blocked` · `done`
 
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
-| T-033 | Scaffold the Chrome MV3 extension: content script, service worker, URL normaliser, warning page, assistant panel | todo | | | |
+| T-033 | Scaffold the Chrome MV3 extension: content script, service worker, URL normaliser, warning page, assistant panel | done | | | |
