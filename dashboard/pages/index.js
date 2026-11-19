@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import CodeBlock from "@/components/beautiful-ui/CodeBlock";
 import LoadingState from "@/components/beautiful-ui/LoadingState";
-import { Button } from "@/components/beautiful-ui/Button";
+import { Button, buttonVariants } from "@/components/beautiful-ui/Button";
 import { Chip } from "@/components/beautiful-ui/Chip";
 import { EntityChip } from "@/components/beautiful-ui/EntityChip";
 import { StatusPill } from "@/components/beautiful-ui/StatusPill";
@@ -166,6 +166,9 @@ export default function Dashboard() {
               <StatusPill tone={status === "error" ? "red" : status === "ok" ? "green" : "neutral"}>
                 {status === "error" ? "Gateway unreachable" : status === "ok" ? "Gateway ok" : "Connecting"}
               </StatusPill>
+              <a href="/console" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+                Ask the log
+              </a>
               <Button
                 variant="secondary"
                 size="sm"

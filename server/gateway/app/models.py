@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -91,4 +91,34 @@ class StoredMessage(BaseModel):
     scam_note: str = ""
     first_seen_id: int | None = None
     first_seen_at: str | None = None
+
+
+class AdminTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=1200)
+
+
+class AdminQuestion(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+    history: list[AdminTurn] = Field(default_factory=list, max_length=6)
+
+    @field_validator("question")
+    @classmethod
+    def question_not_blank(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("question must not be blank")
+        return value
+
+
+class AdminAnswer(BaseModel):
+    answer: str
+    sql: str = ""
+    columns: list[str] = Field(default_factory=list)
+    rows: list[dict[str, Any]] = Field(default_factory=list)
+    row_count: int = 0
+    truncated: bool = False
+    source: Literal["model", "summary"] = "summary"
+    note: str = ""
+    took_ms: int = 0
 

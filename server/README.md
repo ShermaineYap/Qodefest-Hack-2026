@@ -238,12 +238,51 @@ first deploy are migrated in place at startup; see D-009 and D-013.
 Returns `ping` as text. Temporary connectivity check while the extension is unwired; will be removed
 once `/risk/link` is in real use. Do not build product behaviour on it.
 
+### `POST /agent/admin/chat` — admin console
+
+Answers natural-language questions over the stored message log (`/console` in the dashboard). The
+header `X-Admin-Token: <ADMIN_TOKEN>` is required. `ADMIN_TOKEN` lives in `/srv/.env` only; when it
+is unset the endpoint answers `503 {"detail":"admin_disabled"}`, and a missing or wrong token gets
+`401 {"detail":"admin_token_required"}`.
+
+Request: `{"question": "What happened today?", "history": [{"role": "user", "content": "…"}]}`
+(question ≤ 500 characters, at most 6 history turns).
+
+The model turns the question into one SQLite `SELECT`. The gateway validates it (single
+`SELECT`/`WITH` statement, no semicolons, no write/DDL keywords), opens the database read-only
+(`mode=ro`, `PRAGMA query_only`, an authorizer that only allows reads of `messages`), caps the
+result at 200 rows and aborts after 3 s. Response:
+
+```json
+{
+  "answer": "Today (UTC): 4 messages checked — 2 scam, 1 not scam, 1 unsure. Latest: #4 …",
+  "sql": "SELECT status, COUNT(*) AS count FROM messages WHERE date(received_at) = date('now') GROUP BY status",
+  "columns": ["status", "count"],
+  "rows": [{"status": "scam", "count": 2}, {"status": "not_scam", "count": 1}],
+  "row_count": 2,
+  "truncated": false,
+  "source": "model",
+  "note": "",
+  "took_ms": 1842
+}
+```
+
+`source: "model"` means the question became SQL and the model summarised the rows. With no
+`LLM_API_KEY`, or when the model's query is rejected, the gateway answers with a deterministic count
+summary of the stored rows (`source: "summary"` plus a `note` explaining why): real data only, never
+invented rows. Auth is a token; there is no rate limit yet.
+
 ### Dashboard (`/`)
 
 The tunnel root serves a read-only Next.js dashboard (`dashboard/` in the repo) that polls
 `GET /agent/messages?limit=50` every 5 s from the browser (same origin, so no CORS). No auth. It
 filters by kind and free-text on the client and shows raw payloads in a line-numbered panel. When
 the gateway is unreachable it says so and shows the last rows it received — it never fabricates data.
+
+`/console` is the admin chat page linked as "Ask the log": paste `ADMIN_TOKEN` (kept in the tab's
+`sessionStorage`), ask a question, and the answer card shows the text, the SQL that ran, and the
+returned rows. It shows the gateway's error states as-is (disabled, rejected token, unreachable).
+
 Styling uses Tailwind v4 and vendored [Beautiful UI](https://www.beautifului.dev) primitives (MIT;
 see `dashboard/THIRD_PARTY_NOTICES.md`).
 
@@ -259,8 +298,10 @@ see `dashboard/THIRD_PARTY_NOTICES.md`).
 - **Fuzzy scam matching.** New-vs-known compares the exact normalized text (or URL when text is
   empty). A reworded or partly edited repeat counts as a new scam; there is no fuzzy hash, shared
   threat feed or cross-host cache yet.
-- **Auth / rate limits on the message endpoint.** None yet; anyone with the tunnel URL can spend
-  model tokens. Add a shared secret and rate limit before publicising the host.
+- **Auth / rate limits on the message endpoint.** `POST /agent/message` and `GET /agent/messages`
+  have none; anyone with the tunnel URL can spend model tokens and read stored messages.
+  `/agent/admin/chat` requires `ADMIN_TOKEN` but has no rate limit. Add both before publicising the
+  host.
 - **Deny-list, brand-token, domain-age, redirect rules.** Only the five flag-based rules above exist.
 - **CORS / origin allow-list.** No CORS headers are configured. A Manifest V3 service worker calling
   this host with `host_permissions: ["https://<tunnel-host>/*"]` does not need CORS; if the
@@ -377,12 +418,13 @@ curl -s -X POST -H 'Content-Type: application/json' \
 server/
 ├── gateway/
 │   ├── app/
-│   │   ├── main.py       routes: /health, /api/ping, /risk/link, /agent/message, /agent/messages
+│   │   ├── main.py       routes: /health, /api/ping, /risk/link, /agent/message, /agent/messages, /agent/admin/chat
 │   │   ├── client.py     enclave client (HTTP, 8s timeout, fail-closed)
 │   │   ├── db.py         SQLite message log (init, insert, list)
-│   │   ├── models.py     redacted payload + verdict + agent message models
+│   │   ├── insights.py   admin chat: NL → one read-only SELECT, guardrails, summary fallback
+│   │   ├── models.py     redacted payload + verdict + agent message + admin models
 │   │   └── config.py     ENCLAVE_URL, ENCLAVE_TIMEOUT, DB_PATH env vars
-│   ├── tests/            pytest: message logging
+│   ├── tests/            pytest: message logging, scam novelty, admin chat + SQL guardrails
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── requirements-dev.txt

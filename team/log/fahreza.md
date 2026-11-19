@@ -2,6 +2,10 @@
 
 Newest first. Only Fahreza's agent writes here.
 
+## 2026-11-19 06:25
+- Did: Added the admin console (D-016). `POST /agent/admin/chat` takes `{question, history}` and answers over the `messages` table: the model plans one SQLite `SELECT`, the gateway enforces a single read-only statement (mode=ro, query_only, table authorizer, 200-row cap, 3 s deadline) and summarises the rows; with no `LLM_API_KEY` or a rejected query it returns a deterministic count summary labelled `source: "summary"`. Requires `X-Admin-Token` = `ADMIN_TOKEN` (503 when unset, 401 otherwise). New dashboard page `/console` ("Ask the log" on `/`) keeps the token in sessionStorage and shows the answer, the SQL and the rows. 38 gateway tests pass (12 new); Next build passes; HTTP smoke test through a local gateway returned the expected summary and 401.
+- Next: set `ADMIN_TOKEN` in `/srv/.env` + gateway environment and rebuild to make `/console` live; push the branch.
+- Blocked on / needs from others: nothing.
 ## 2026-11-19 06:16
 - Did: Added the new-vs-known scam check to `POST /agent/message` (D-015). Each message is fingerprinted (SHA-256 of lower-cased, whitespace-collapsed text; URL when text is empty) and looked up in SQLite; scams return `scam_status: "new_scam" | "known_scam"`, a plain-language `scam_note`, and `first_seen_id` / `first_seen_at` for repeats. Exact repeats of a stored scam stay `scam` even if the model is weaker that day; `not_scam` / `unsure` return `scam_status: null`. Schema columns are migrated in place and existing rows are fingerprinted at startup. `GET /agent/messages` returns the new fields; the dashboard shows a New/Known scam pill and the note in the expanded row. Updated `server/README.md` and the root status table. Gateway tests: 16 pass.
 - Next: redeploy the gateway to the team server for T-042's enclave work, then verify the tunneled endpoint with a first and repeat scam message.
