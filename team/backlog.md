@@ -15,7 +15,9 @@ Status: `todo` · `doing` · `blocked` · `done`
 
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
-| T-037 | Confirm your area in `roles.md` as part of the M0 ownership split | todo | | | |
+| T-037 | Confirm your area in `roles.md` as part of the M0 ownership split | done | | | |
+| T-039 | Build the Lantern Assistant (`assistant/`): bounded agent endpoint, chat panel, API contract, tests | doing | | | |
+| T-041 | Deploy `assistant/` on Vercel and add the Qwen key | todo | | | |
 
 ## Fahreza Alghifari
 
@@ -29,3 +31,4 @@ Status: `todo` · `doing` · `blocked` · `done`
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
 | T-033 | Scaffold the Chrome MV3 extension: content script, service worker, URL normaliser, warning page, assistant panel | done | | | |
+| T-040 | Embed the Lantern Assistant panel in the extension side panel (steps in `docs/assistant-api.md`), or call `/api/agent/chat` from your panel for message checks | todo | T-041 | Shermaine Yap | |
