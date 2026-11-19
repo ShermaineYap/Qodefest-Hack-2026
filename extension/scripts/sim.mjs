@@ -217,8 +217,9 @@ async function main() {
     await panel.goto(`chrome-extension://${extId}/panel/panel.html`);
     await panel.fill('#input', `Mak: tolong check ${HIGH_LINK}`);
     await panel.click('#check');
-    await panel.waitForFunction(() => document.getElementById('result')?.innerText.trim().length > 0, null, { timeout: 10000 }).catch(() => {});
-    const panelText = (await panel.innerText('#result')).trim();
+    // The panel is a chat (D-014): wait for the first finished verdict card, not the greeting.
+    await panel.waitForSelector('#log .card:not(.card--checking)', { timeout: 10000 }).catch(() => {});
+    const panelText = ((await panel.locator('#log .card:not(.card--checking)').first().innerText().catch(() => '')) || '').trim();
     check('side panel check flags the pasted scam link', /scam/i.test(panelText), `result: "${panelText.split('\n')[0] ?? ''}"`);
     await panel.screenshot({ path: path.join(OUT, '4-panel.png'), fullPage: true });
   } finally {

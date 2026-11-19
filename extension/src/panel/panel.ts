@@ -126,7 +126,15 @@ const ASSISTANT_CLASS: Record<AssistantTier, string> = {
   HIGH: 'card--high',
   NOT_CHECKED: 'card--unknown',
 };
-const ICON: Record<string, string> = { low: '🟢', medium: '🟡', high: '🔴', LOW: '🟢', MEDIUM: '🟡', HIGH: '🔴', NOT_CHECKED: '⚠️' };
+// Tier is shown as a word plus the card's colour bar (no emojis in the UI, design/DESIGN.md).
+const TIER_WORD: Record<Lang, Record<string, string>> = {
+  en: { low: 'Low risk', medium: 'Medium risk', high: 'High risk', LOW: 'Low risk', MEDIUM: 'Medium risk', HIGH: 'High risk', NOT_CHECKED: 'Not checked' },
+  ms: { low: 'Risiko rendah', medium: 'Risiko sederhana', high: 'Risiko tinggi', LOW: 'Risiko rendah', MEDIUM: 'Risiko sederhana', HIGH: 'Risiko tinggi', NOT_CHECKED: 'Tidak disemak' },
+};
+
+function tierTag(tier: string): HTMLElement {
+  return make('p', `tier-tag tier-tag--${tier.toLowerCase()}`, TIER_WORD[lang][tier] ?? tier);
+}
 
 let lang: Lang = 'en';
 let busy = false;
@@ -405,7 +413,8 @@ function makeCopyButton(url: string, tier: Tier, headline: string, sentences: st
 function linkCard(url: string, status: ScoreStatus, raw: string): HTMLElement {
   if (status.status === 'not_checked') {
     const card = make('div', 'card card--unknown');
-    card.append(make('h2', 'card__headline', `${ICON.NOT_CHECKED} ${L().couldNotCheckLink}`));
+    card.append(tierTag('NOT_CHECKED'));
+    card.append(make('h2', 'card__headline', L().couldNotCheckLink));
     card.append(make('p', 'card__sentence', status.reason));
     if (status.localSignals.length > 0) card.append(make('p', 'card__sentence', L().localSignals(status.localSignals.length)));
     card.append(makeExplainButton(raw));
@@ -413,7 +422,8 @@ function linkCard(url: string, status: ScoreStatus, raw: string): HTMLElement {
   }
   const { result } = status;
   const card = make('div', `card ${TIER_CLASS[result.tier]}`);
-  card.append(make('h2', 'card__headline', `${ICON[result.tier]} ${result.headline}`));
+  card.append(tierTag(result.tier));
+  card.append(make('h2', 'card__headline', result.headline));
   for (const sentence of result.sentences) card.append(make('p', 'card__sentence', sentence));
   card.append(make('p', 'meta', `${L().whatChecked}: ${result.checked.join(', ')}.`));
   card.append(make('p', 'meta', `${L().requestId}: ${result.requestId}`));
@@ -473,14 +483,16 @@ function assistantCard(status: AskStatus, raw: string): HTMLElement {
   if (status.status === 'not_checked') {
     const card = make('div', 'card card--unknown');
     card.append(make('p', 'meta card__from', L().assistant));
-    card.append(make('h2', 'card__headline', `${ICON.NOT_CHECKED} ${L().couldNotCheck}`));
+    card.append(tierTag('NOT_CHECKED'));
+    card.append(make('h2', 'card__headline', L().couldNotCheck));
     card.append(make('p', 'card__sentence', status.reason));
     return card;
   }
   const r: AssistantResult = status.result;
   const card = make('div', `card ${ASSISTANT_CLASS[r.tier]}`);
   card.append(make('p', 'meta card__from', L().assistant));
-  card.append(make('h2', 'card__headline', `${ICON[r.tier]} ${r.label}`));
+  card.append(tierTag(r.tier));
+  card.append(make('h2', 'card__headline', r.label));
   if (r.summary) card.append(make('p', 'card__sentence', r.summary));
 
   const why = make('details', 'why');

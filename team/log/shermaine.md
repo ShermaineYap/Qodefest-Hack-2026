@@ -2,6 +2,11 @@
 
 Newest first. Only Shermaine's agent writes here.
 
+## 2026-11-19 14:45 +08
+- Did: Brought the side panel in line with the UI rule: no emojis (tier shown as a word plus the colour bar), Attach/Remove as text, text colours from variables, body text ≥16px in the new parts. Updated `npm run sim` step 6 to wait for the chat's first finished verdict card (`#log .card`) instead of `#result`; it passes ("HIGH RISK"). Sim is 13/16; the 3 failures (IP-literal and `@` userinfo links expected 🔴 but scored 🟡, and the address-bar case that depends on them) fail identically on main without my changes.
+- Next: nothing on the panel unless the team wants the full WareTrack theme pass (Fihkri said he will migrate UI surfaces).
+- Blocked on / needs from others: Fihkri: decide whether IP-literal (60) and userinfo (70) should be HIGH or the sim should expect MEDIUM (T-044).
+
 ## 2026-11-19 14:35 +08
 - Did: Side panel can attach one screenshot (📎 button, paste, or drag and drop). PNG/JPEG/WebP only, shrunk on-device to ≤1600 px JPEG (≤4.5 MB data URL), shown as a thumbnail in the chat, removable before sending, kept in memory only. Sent as `image` with `kind: "screenshot"` to the gateway's `/agent/message` (D-013), which forwards it to the vision model and stores only mime and size. Tested in the real extension against the local gateway: a sample scam SMS screenshot (~51 KB after resizing) went through; mock mode answers "unsure" for any screenshot until `LLM_API_KEY` is set.
 - Next: Fahreza sets the model key so screenshots get a real verdict from `qwen-vl-plus`.

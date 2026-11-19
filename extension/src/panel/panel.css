@@ -401,7 +401,7 @@ button.button-secondary:disabled {
 
 .lang__btn[aria-pressed='true'] {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary, var(--surface));
 }
 
 .lang__btn:focus-visible {
@@ -432,7 +432,7 @@ button.button-secondary:disabled {
 .bubble--user {
   align-self: flex-end;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary, var(--surface));
   border-bottom-right-radius: 4px;
 }
 
@@ -473,7 +473,7 @@ button.button-secondary:disabled {
   padding: 8px 10px;
   border-radius: 8px;
   background: var(--bg);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 button.button-primary {
@@ -484,7 +484,7 @@ button.button-primary {
   border: 0;
   border-radius: var(--radius);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary, var(--surface));
   font: inherit;
   font-size: 17px;
   font-weight: 650;
@@ -523,7 +523,7 @@ button.button-explain {
   background: var(--surface);
   color: var(--primary);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -576,7 +576,7 @@ button.button-attach:focus-visible {
 
 .attach-hint {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .attachment {
@@ -612,13 +612,15 @@ button.button-attach:focus-visible {
 }
 
 .attachment__remove {
-  width: 40px;
+  min-width: 44px;
   height: 40px;
+  padding: 0 10px;
   border: 0;
-  border-radius: 50%;
+  border-radius: 8px;
   background: var(--bg);
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -634,3 +636,16 @@ textarea.is-dropping {
   margin-bottom: 8px;
   border-radius: 10px;
 }
+
+.tier-tag {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tier-tag--high { color: var(--tier-high); }
+.tier-tag--medium { color: var(--tier-medium); }
+.tier-tag--low { color: var(--tier-low); }
+.tier-tag--not_checked { color: var(--tier-unknown); }
