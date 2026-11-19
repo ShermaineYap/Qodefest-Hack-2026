@@ -174,6 +174,6 @@ server.on('error', (error) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`mock-api: canned Link Guard scoring on http://localhost:${PORT}`);
+  console.log(`mock-api: canned Lantern scoring on http://localhost:${PORT}`);
   console.log(`mock-api: POST /risk/link, GET /health. Dev aid only.`);
 });

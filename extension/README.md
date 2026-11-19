@@ -1,6 +1,6 @@
-# Link Guard extension
+# Lantern extension
 
-Chrome MV3 scaffold for the Link Guard hack project. The product spec is the repository root
+Chrome MV3 scaffold for the Lantern hack project. The product spec is the repository root
 `README.md`; this file covers building, running and the API contract.
 
 ## Requirements

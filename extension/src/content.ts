@@ -260,11 +260,11 @@ function ensureStyles(): void {
 function showNotice(site: SiteConfig): void {
   if (noticeShown) return;
   noticeShown = true;
-  console.warn(`[Link Guard] Could not read ${site.label}: zero message containers matched ${site.messageSelector}.`);
+  console.warn(`[Lantern] Could not read ${site.label}: zero message containers matched ${site.messageSelector}.`);
   try {
     const notice = document.createElement('div');
     notice.className = 'lg-notice';
-    notice.textContent = `Link Guard could not read ${site.label}. Links here are not checked.`;
+    notice.textContent = `Lantern could not read ${site.label}. Links here are not checked.`;
     document.body.append(notice);
   } catch {
     /* the page may not allow a body yet */

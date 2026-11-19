@@ -1,9 +1,9 @@
 {
-  "name": "link-guard-extension",
+  "name": "lantern-extension",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Link Guard - Chrome MV3 extension (Qodefest Hack 2026)",
+  "description": "Lantern - Chrome MV3 extension (Qodefest Hack 2026)",
   "engines": {
     "node": ">=22.6"
   },
