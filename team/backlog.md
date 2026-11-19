@@ -32,6 +32,7 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-047 | Admin console: token-gated `POST /agent/admin/chat` (read-only SQL guardrails, summary fallback) and `/console` chat page (D-017) | done | | | |
 | T-048 | Fix `/agent/message` on the live deployment: it answered `503 {"detail":"agent_unavailable"}` earlier on 2026-11-19, so the assistant panel could only show NOT CHECKED. Fixed by Fahreza's redeploy before this was pushed — the endpoint now returns `201` from the keyword mock (no model key configured), so the assistant demo works on the tunnel | done | | williamkee51 | |
 | T-053 | Remove the `ADMIN_TOKEN` gate from `/agent/admin/chat` and `/console` at the admin's request; token UI, 401/503 states and the env/compose setting are gone, guardrails from D-017 unchanged (D-018) | done | | | |
+| T-054 | Admin dashboard overview: KPI cards, 24h volume, verdict/novelty/client/model meters, verdict filters and expandable log on `/`, computed from `GET /agent/messages?limit=100` (D-019) | done | | | |
 
 ## Fihkri
 
