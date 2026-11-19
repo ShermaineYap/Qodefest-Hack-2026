@@ -218,6 +218,7 @@ This repository is the main workspace for Qodefest Hack 2026. The extension is s
 | `/risk/link` | Live at the current tunnel host — see `server/README.md` |
 | Agent endpoint | `POST /agent/message` on the gateway checks text and/or a screenshot with an OpenAI-compatible model and returns `scam` \| `not_scam` \| `unsure` + reply; stored in SQLite; keyword mock until `LLM_API_KEY` is set. Ask SHOU v1 in `server/index.ts` (not in the compose stack yet) |
 | Dashboard | Read-only message-log viewer at the tunnel root (`dashboard/`), Beautiful UI primitives, no auth |
+| Daily scam report | Qoder Agent SDK job in `server/reports/`, cron 23:30 MYT, writes `/srv/reports/YYYY-MM-DD.md` on the server only (needs `QODER_PERSONAL_ACCESS_TOKEN`) |
 | Eval set and gate | Not started |
 
 ---

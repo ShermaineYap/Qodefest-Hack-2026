@@ -94,3 +94,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Why: the gateway already hosts a model-backed check on the live tunnel, so the extension needs no second deployment.
 - Affects: Fihkri (panel and service worker), Fahreza Alghifari (`/agent/message` is now called by the extension; replies are English in mock mode)
 
+## D-015 — 2026-11-19 — Daily scam report via the Qoder Agent SDK, server file only
+- Decided by: Fahreza Alghifari
+- Decision: A host-side Node 22 job in `server/reports/` reads the day's rows from `/srv/data/messages.db`, masks emails and digit runs before sending anything, and asks a Qoder Agent SDK agent (`@qoder-ai/qoder-agent-sdk`, no tools, `model: efficient`, no session persistence) to write a Markdown scam report to `/srv/reports/YYYY-MM-DD.md`. It runs daily at 23:30 Asia/Kuala_Lumpur (15:30 UTC) from Fahreza's crontab, and can be triggered on demand with `server/reports/run-report.sh` (optionally `--dry-run` or a `YYYY-MM-DD` argument) for the demo. Auth is a Qoder PAT in `QODER_PERSONAL_ACCESS_TOKEN`, loaded from `~/.config/lantern/report.env` (mode 600, never committed); without it the job fails and writes no report. Reports stay on the server filesystem and are not routed through nginx or the tunnel. This is an internal ops tool for the dummy message log, not part of the extension's runtime path or its privacy promises.
+- Why: the team needs a repeatable, demoable summary of the day's scam verdicts without adding another public surface or another service to the compose stack.
+- Affects: Fahreza Alghifari (job, credentials, schedule); anyone reading `/srv/reports`; no client or tunnel change
+
