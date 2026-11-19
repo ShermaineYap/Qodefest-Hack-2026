@@ -258,7 +258,8 @@ see `dashboard/THIRD_PARTY_NOTICES.md`).
   `server/index.ts`, :8787/Vercel) is still not part of this compose stack.
 - **Fuzzy scam matching.** New-vs-known compares the exact normalized text (or URL when text is
   empty). A reworded or partly edited repeat counts as a new scam; there is no fuzzy hash, shared
-  threat feed or cross-host cache yet.
+  threat feed or cross-host cache yet. A screenshot-only message with no text or URL cannot be
+  deduplicated.
 - **Auth / rate limits on the message endpoint.** None yet; anyone with the tunnel URL can spend
   model tokens. Add a shared secret and rate limit before publicising the host.
 - **Deny-list, brand-token, domain-age, redirect rules.** Only the five flag-based rules above exist.
