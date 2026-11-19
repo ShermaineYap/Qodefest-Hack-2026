@@ -317,6 +317,10 @@ reasons and what was checked. A screenshot can be pasted, dropped or attached. T
 from a keyword mock when no model key is set, which is fine for the demo. A pasted link still goes
 through the badge pipeline and shows "What leaves this device" (the redacted payload preview).
 
+| Side panel | Scam message | Link check | Screenshot attached | Screenshot verdict |
+|---|---|---|---|---|
+| ![](docs/screenshots/panel-start.png) | ![](docs/screenshots/panel-message.png) | ![](docs/screenshots/panel-link.png) | ![](docs/screenshots/panel-attach-preview.png) | ![](docs/screenshots/panel-attach-result.png) |
+
 **The chat badges (only with a ready WhatsApp Web account).** A teammate sends the fake Maybank link
 from their phone and a 🔴 badge appears in the chat before anyone clicks; the real Maybank link shows
 🟢. Content scripts match `web.whatsapp.com`, `web.telegram.org` and `www.messenger.com`. Badge
