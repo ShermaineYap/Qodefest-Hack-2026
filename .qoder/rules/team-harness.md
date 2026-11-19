@@ -4,7 +4,7 @@ trigger: always_on
 
 # Team harness — read this before doing anything else
 
-This repo is shared by four people (TEAM WEB 1.5), each working with their own AI agent at the same time.
+This repo is shared by TEAM WEB 1.5 members, each working with their own AI agent at the same time.
 The files under `team/` are how we stay in step. Follow this protocol in every session.
 
 ## 1. Session start

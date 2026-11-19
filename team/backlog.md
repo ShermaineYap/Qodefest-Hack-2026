@@ -13,12 +13,13 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-002 | Fill in `timeline.md` dates from the Qodefest schedule | todo | | | |
 | T-003 | Sketch the architecture (components, who owns each) in `docs/` | todo | T-001 | | |
 | T-004 | Re-split the backlog once the idea is locked | todo | T-001 | | |
+| T-035 | Update the first end-to-end demo milestone owners in `timeline.md` to include Irfan (Chrome extension) and Fahreza (backend), per D-002 | todo | | Irfan | |
 
 ## Shermaine
 
 | ID | Task | Status | Blocked by | Requested by | Due |
 | --- | --- | --- | --- | --- | --- |
-| T-010 | Set up the frontend / extension skeleton and how to run it locally | todo | | | |
+| T-010 | Set up the guardian dashboard frontend skeleton and how to run it locally; extension setup is T-033 (D-002) | todo | | | |
 | T-011 | Spike the Gonka Router integration: auth, one request end to end | todo | | | |
 | T-012 | Decide what goes on the team server and how it is deployed (decision) | todo | T-003 | | |
 
@@ -37,3 +38,15 @@ Status: `todo` · `doing` · `blocked` · `done`
 | T-030 | Agree the research split with Daniel (same as T-020) | todo | | | |
 | T-031 | Regulatory landscape relevant to the idea, with sources | todo | T-001 | | |
 | T-032 | Business and financial value: model, costs, who pays | todo | T-001 | | |
+
+## Irfan
+
+| ID | Task | Status | Blocked by | Requested by | Due |
+| --- | --- | --- | --- | --- | --- |
+| T-033 | Set up the Chrome extension skeleton and how to run it locally; extension scope split from T-010 (D-002) | todo | | | |
+
+## Fahreza
+
+| ID | Task | Status | Blocked by | Requested by | Due |
+| --- | --- | --- | --- | --- | --- |
+| T-034 | Implement the backend and agree the extension API contract with Irfan (D-002) | todo | | Irfan | |

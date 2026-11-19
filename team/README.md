@@ -1,6 +1,6 @@
 # How the team works (read once, 2 minutes)
 
-Four of us, four AI agents, one repo. `team/` is our shared memory.
+One team, each with their own AI agent, one repo. `team/` is our shared memory.
 
 | File | What | Who edits |
 | --- | --- | --- |

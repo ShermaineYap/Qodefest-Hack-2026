@@ -4,8 +4,10 @@
 | --- | --- | --- | --- | --- |
 | Daniel anak Boniface Alin | `log/daniel.md` | _(agent fills in)_ | Research | Business and financial value, target users, statistics, regulatory |
 | Hana Tang | `log/hana.md` | _(agent fills in)_ | Lead / planning + on-chain | Overall planning, `timeline.md`, Move contracts, TEE enclave, driver SDK, zkLogin and recovery |
-| Shermaine Yap Shi Min | `log/shermaine.md` | _(agent fills in)_ | Integrations + frontend | Gonka Router integration, Chrome extension, guardian dashboard |
+| Shermaine Yap Shi Min | `log/shermaine.md` | _(agent fills in)_ | Integrations + frontend | Gonka Router integration, guardian dashboard |
 | Liaw Yi Wen | `log/liaw.md` | _(agent fills in)_ | Research | Business and financial value, target users, statistics, regulatory |
+| Irfan | `log/irfan.md` | irfanfikhri@gmail.com | Chrome extension | Chrome extension implementation and client-side backend integration |
+| Fahreza | `log/fahreza.md` | fahreza@express.ai | Backend | Backend implementation and APIs for the Chrome extension |
 
 Daniel and Liaw share a role: split it in `backlog.md` (suggested: Daniel → users, statistics, market size;
 Liaw → regulatory, business and financial model) and record the split in `decisions.md`.

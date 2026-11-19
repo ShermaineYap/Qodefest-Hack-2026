@@ -1,6 +1,6 @@
 # Team harness — short design (approved 2026-11-19)
 
-**Intent**: let the four TEAM WEB 1.5 members start working independently today, each with their own Qoder agent, without losing track of who does what or colliding in git.
+**Intent**: let TEAM WEB 1.5 members start working independently today, each with their own Qoder agent, without losing track of who does what or colliding in git.
 
 **Goals**: shared roles, timeline, backlog, decisions; per-person session logs; an always-on agent rule for session start/end. **Non-goals**: tooling, scripts, dashboards, GitHub Projects. **Anti-goal**: merge conflicts on shared files when several agents push on the same day.
 
