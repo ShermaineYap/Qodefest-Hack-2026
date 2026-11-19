@@ -26,7 +26,7 @@ The files under `team/` are how we stay in step. Follow this protocol in every s
   Code and docs: prefer the areas the user owns in `team/roles.md`; if a change touches another member's area, say so before making it.
 - **Need someone else?** Add a task to *their* section with `requested-by: <user>` — that is the one allowed edit outside your own section. Never change status or text of someone else's existing tasks.
 - **Decisions** that affect more than one person (scope, architecture, naming, tech choice) go in `team/decisions.md` as the next numbered entry, appended at the end. Never edit or delete an earlier decision; supersede it with a new one.
-- `team/timeline.md` is owned by Hana (overall planning). Others propose changes as a task in Hana's backlog section.
+- `team/timeline.md` is owned by the person named at the top of that file. Others propose changes as a task in that person's backlog section.
 - New tasks get the next free ID (`T-###`) — scan the whole `team/backlog.md` for the highest ID first.
 
 ## 3. Session end (or when the user says "save", "wrap up", "done for now")

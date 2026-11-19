@@ -17,7 +17,13 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Affects: everyone
 
 ## D-002 — 2026-11-19 — Chrome extension and backend ownership
-- Decided by: Irfan (reporting the assigned responsibilities)
-- Decision: Irfan (`irfanfikhri@gmail.com`) owns the Chrome extension and its client-side backend integration. Fahreza (`fahreza@express.ai`) owns the backend and its APIs for the extension. This replaces the earlier Chrome extension assignment to Shermaine; Shermaine retains Gonka Router integration and the guardian dashboard. Other responsibilities remain unchanged.
+- Decided by: Fihkri (reporting the assigned responsibilities)
+- Decision: Fihkri (`irfanfikhri@gmail.com`, GitHub `Fikhri02`) owns the Chrome extension. Fahreza Alghifari (`fahreza@express.ai`) owns the backend and its APIs for the extension.
 - Why: records the assigned extension/backend split so each person and their agent work in the correct area.
-- Affects: Irfan, Fahreza, Shermaine; Hana to update the end-to-end demo milestone owners.
+- Affects: Fihkri, Fahreza Alghifari
+
+## D-003 — 2026-11-19 — Team roster is the four people in the README
+- Decided by: Fihkri
+- Decision: `team/` follows the roster in the README: williamkee51, Shermaine Yap, Fahreza Alghifari and Fihkri. Sections, logs and tasks for Daniel, Hana and Liaw are removed; they described people who are not on this team and an earlier project scope. Areas not yet assigned stay "to confirm" in `roles.md` until M0.
+- Why: keep `team/` and the README describing the same team, without inventing ownership.
+- Affects: everyone

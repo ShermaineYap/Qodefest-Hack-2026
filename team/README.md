@@ -5,7 +5,7 @@ One team, each with their own AI agent, one repo. `team/` is our shared memory.
 | File | What | Who edits |
 | --- | --- | --- |
 | `roles.md` | Who owns which area, and each person's git email | Each person their own row |
-| `timeline.md` | Milestones and deadlines | Hana |
+| `timeline.md` | Milestones and deadlines | Its named owner (M0) |
 | `backlog.md` | Tasks, one section per person | Each person their own section (+ `requested-by` tasks for others) |
 | `decisions.md` | Numbered decisions that affect more than one person | Anyone — append only |
 | `log/<name>.md` | Your session log, newest first | Only you |
