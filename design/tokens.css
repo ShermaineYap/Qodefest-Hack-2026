@@ -1,0 +1,104 @@
+/* WareTrack theme tokens. Source of truth for every UI colour in this repo; see design/DESIGN.md.
+   Use these variables; never type a hex value into a component stylesheet. */
+
+:root {
+  color-scheme: light;
+
+  /* ground and surfaces (one cool green-grey family) */
+  --bg: #edf2f1;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #d5dfdd;
+  --text: #222222;
+  --muted: #5f6b69;
+
+  /* brand: deep teal; the one accent */
+  --brand: #003439;
+  --primary: #00796b;
+  --primary-hover: #00695c;
+  --on-primary: #ffffff;
+  --focus-ring: #00796b;
+
+  /* risk tiers / status (never decoration) */
+  --success: #2e7d32;
+  --warning: #b45309;       /* fill, with --on-warning text */
+  --warning-text: #a34a07;  /* warning as text on --bg or --surface */
+  --on-warning: #ffffff;
+  --danger: #c62828;
+  --on-danger: #ffffff;
+  --info: #1565c0;
+  --unknown: #5f6b69;
+
+  --tier-low: var(--success);
+  --tier-medium: var(--warning-text);
+  --tier-high: var(--danger);
+  --tier-unknown: var(--unknown);
+
+  /* tinted area for the warning page's domain box only */
+  --danger-tint: #fdecea;
+
+  /* type */
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --text-display: 22px;
+  --text-title: 18px;
+  --text-body: 16px;
+  --text-small: 14px;
+  --text-code: 15px;
+
+  /* shape and space */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-dialog: 16px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --target-min: 44px;
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.18);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #111111;
+    --surface: #1e1e1e;
+    --surface-raised: #262626;
+    --border: #333836;
+    --text: #eeeeee;
+    --muted: #aaaaaa;
+
+    --brand: #00c896;
+    --primary: #00c896;
+    --primary-hover: #33d3aa;
+    --on-primary: #06201d;
+    --focus-ring: #00c896;
+
+    --success: #66bb6a;
+    --warning: #f5a524;
+    --warning-text: #f5a524;
+    --on-warning: #1c1000;
+    --danger: #ff6b6b;
+    --on-danger: #1a0505;
+    --info: #64b5f6;
+    --unknown: #aaaaaa;
+
+    --danger-tint: #3a1716;
+    --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 150ms;
+  }
+}
