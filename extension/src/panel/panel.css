@@ -365,3 +365,182 @@ button.button-secondary:disabled {
     transition: none;
   }
 }
+
+/* ---------- Chat layout (Lantern Assistant in the side panel) ---------- */
+
+.chat {
+  gap: 14px;
+}
+
+.chat__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lang {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.lang__btn {
+  min-width: 48px;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.lang__btn[aria-pressed='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+
+.lang__btn:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: -3px;
+}
+
+.chat__log {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat__log .card {
+  margin: 0;
+}
+
+.bubble {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 16px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.bubble--user {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble--bot {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.card__from {
+  margin: 0 0 4px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.why {
+  margin: 8px 0 4px;
+}
+
+.why summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--primary);
+}
+
+.why ul {
+  margin: 6px 0 6px;
+  padding-left: 20px;
+}
+
+.why li {
+  margin: 4px 0;
+}
+
+.note {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 15px;
+}
+
+button.button-primary {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.card--high button.button-primary {
+  background: var(--tier-high);
+}
+
+button.button-primary:focus-visible {
+  outline: 3px solid var(--primary-dark);
+  outline-offset: 2px;
+}
+
+button.button-explain {
+  margin-top: 10px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chips:empty {
+  display: none;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 1.5px solid var(--primary);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: var(--bg);
+}
+
+.chip:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.chat__composer {
+  padding-top: 4px;
+}
+
+.chips[hidden] {
+  display: none;
+}

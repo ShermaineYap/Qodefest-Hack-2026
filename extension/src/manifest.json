@@ -11,9 +11,7 @@
   ],
   "host_permissions": [
     "https://*.trycloudflare.com/*",
-    "http://localhost:4000/*",
-    "https://*.vercel.app/*",
-    "http://localhost:8787/*"
+    "http://localhost:4000/*"
   ],
   "background": {
     "service_worker": "background.js",

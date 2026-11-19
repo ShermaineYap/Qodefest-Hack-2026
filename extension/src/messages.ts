@@ -36,6 +36,9 @@ export interface AssistantResult {
   checked: string[];
   notChecked: string[];
   action: string | null;
+  actions: { id: string; label: string }[];
+  quickReplies: { id: string; label: string }[];
+  subject: string;
   basis: string;
 }
 

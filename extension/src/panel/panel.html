@@ -7,17 +7,27 @@
     <link rel="stylesheet" href="./panel.css" />
   </head>
   <body>
-    <main class="panel">
-      <header class="panel__header">
-        <h1>Lantern</h1>
-        <p class="muted">Check a link or a message before you act on it.</p>
+    <main class="panel chat">
+      <header class="panel__header chat__header">
+        <div>
+          <h1>Lantern</h1>
+          <p class="muted" id="subtitle">Check a link or a message before you act on it.</p>
+        </div>
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" class="lang__btn" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang__btn" data-lang="ms" aria-pressed="false">BM</button>
+        </div>
       </header>
 
-      <form class="input-group" novalidate>
-        <label class="field-label" for="input">Paste the link or the message</label>
+      <section id="log" class="chat__log" aria-live="polite"></section>
+
+      <div id="starters" class="chips"></div>
+
+      <form class="input-group chat__composer" novalidate>
+        <label class="field-label" for="input" id="input-label">Paste the link or the message</label>
         <textarea
           id="input"
-          rows="4"
+          rows="3"
           placeholder="For example: maybank-secure-login.xyz/login"
           spellcheck="false"
           autocomplete="off"
@@ -27,14 +37,12 @@
       </form>
 
       <details id="redaction" class="redaction" hidden>
-        <summary>What leaves this device</summary>
+        <summary id="redaction-title">What leaves this device</summary>
         <ul id="redaction-list"></ul>
       </details>
 
-      <section id="result" class="result" aria-live="polite"></section>
-
       <footer class="panel__footer">
-        <p class="muted">Nothing is saved. Closing this panel forgets everything.</p>
+        <p class="muted" id="footer">Nothing is saved. Closing this panel forgets everything.</p>
       </footer>
     </main>
     <script type="module" src="./panel.js"></script>

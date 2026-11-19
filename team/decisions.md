@@ -88,3 +88,9 @@ Append only. Number each entry. To change one, add a new entry that supersedes i
 - Why: the front end needs a real verdict and reply now; a strict status enum plus fail-closed 503 keeps the client from ever showing a guessed "safe".
 - Affects: Fihkri / Shermaine (client reads `status`, `reply`, `reasons` from the 201; any 503 is NOT CHECKED, never green), Fahreza Alghifari (model config in `/srv/.env`)
 
+## D-014 — 2026-11-19 — Side panel is a chat; its messages go to the gateway's `/agent/message`
+- Decided by: Shermaine Yap
+- Decision: The extension side panel is now one conversation (user bubbles, verdict cards, EN/BM toggle, quick replies "What if I already clicked?", "I already paid", "Why?"). A pasted link still goes through `/risk/link` (badge pipeline, redacted payload, `localScore` now sent from the panel too); "Ask Lantern Assistant to explain" and any link-free message go to the gateway's `POST /agent/message` (D-013) on the same `API_BASE`. Mapping: `scam` → HIGH, `unsure` → MEDIUM, `not_scam` → LOW; any non-2xx or unreadable answer → NOT CHECKED. Only the pasted text is sent (no page URL). This supersedes the `ASSISTANT_BASE` / Vercel part of D-012: one host, one host permission, and every chat message shows on the dashboard. The standalone Ask SHOU app (`server/index.ts`, `panel/`) stays as a separate demo and is not called by the extension.
+- Why: the gateway already hosts a model-backed check on the live tunnel, so the extension needs no second deployment.
+- Affects: Fihkri (panel and service worker), Fahreza Alghifari (`/agent/message` is now called by the extension; replies are English in mock mode)
+

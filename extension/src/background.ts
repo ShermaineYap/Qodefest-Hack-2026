@@ -1,4 +1,4 @@
-import { API_BASE, ASSISTANT_BASE, ASSISTANT_PATH, ASSISTANT_TIMEOUT_MS, SCORE_PATH, SCORE_TIMEOUT_MS } from './config.ts';
+import { AGENT_PATH, AGENT_TIMEOUT_MS, API_BASE, SCORE_PATH, SCORE_TIMEOUT_MS } from './config.ts';
 import { analyseUrl } from './link.ts';
 import type { AskStatus, AssistantResult, ExtensionMessage, RiskResult, ScoreStatus, Tier } from './messages.ts';
 import { TIER_RANK } from './messages.ts';
@@ -139,48 +139,80 @@ async function getVerdict(url: string): Promise<ScoreStatus | null> {
 
 
 // ---- Lantern Assistant: messages pasted into the side panel ----
-// The service worker stays the only network surface. Memory only: nothing is stored.
-const ASSISTANT_SESSION = `sess_${crypto.randomUUID()}`;
-const ASSISTANT_TIERS = new Set(['HIGH', 'MEDIUM', 'LOW', 'NOT_CHECKED']);
+// Calls the gateway's POST /agent/message (D-013). The service worker stays the only network surface.
+// Only the text the user pasted is sent; no page URL, no history. Any failure is NOT CHECKED.
+const AGENT_TIER: Record<string, AssistantResult['tier']> = { scam: 'HIGH', unsure: 'MEDIUM', not_scam: 'LOW' };
 
-function parseAssistant(raw: unknown): AssistantResult | null {
+const AGENT_COPY = {
+  en: {
+    HIGH: 'This looks like a scam.',
+    MEDIUM: 'Be careful with this one.',
+    LOW: 'No scam signs found.',
+    actions: { go_back: 'Go back to safety', ask_someone: 'Ask someone I trust', check_another: 'Check another' },
+    replies: { why: 'Why?', clicked: 'What if I already clicked?', paid: 'I already paid', another: 'Check another' },
+    checked: ['the words'],
+    notChecked: ['who really sent it'],
+  },
+  ms: {
+    HIGH: 'Ini nampak macam penipuan.',
+    MEDIUM: 'Hati-hati dengan yang ini.',
+    LOW: 'Tiada tanda penipuan ditemui.',
+    actions: { go_back: 'Kembali ke tempat selamat', ask_someone: 'Tanya orang yang saya percaya', check_another: 'Semak yang lain' },
+    replies: { why: 'Kenapa?', clicked: 'Kalau saya dah klik?', paid: 'Saya sudah bayar', another: 'Semak yang lain' },
+    checked: ['perkataan'],
+    notChecked: ['siapa sebenarnya penghantar'],
+  },
+};
+
+function parseAgent(raw: unknown, locale: 'en' | 'ms'): AssistantResult | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const body = raw as Record<string, unknown>;
-  const v = body.verdict as Record<string, unknown> | undefined;
-  if (!v || typeof v.tier !== 'string' || !ASSISTANT_TIERS.has(v.tier)) return null;
-  const reasons = Array.isArray(v.reasons)
-    ? v.reasons.map((r) => (r && typeof (r as { text?: unknown }).text === 'string' ? (r as { text: string }).text : '')).filter(Boolean)
-    : [];
-  const notChecked = Array.isArray(v.notChecked)
-    ? v.notChecked.map((n) => (n && typeof (n as { why?: unknown }).why === 'string' ? (n as { why: string }).why : '')).filter(Boolean)
-    : [];
-  const actions = Array.isArray(v.actions) ? v.actions : [];
-  const first = actions[0] as { label?: unknown } | undefined;
+  const tier = typeof body.status === 'string' ? AGENT_TIER[body.status] : undefined;
+  if (!tier) return null;
+  const copy = AGENT_COPY[locale];
+  const reply = typeof body.reply === 'string' ? body.reply : '';
+  const action =
+    tier === 'HIGH'
+      ? { id: 'go_back', label: copy.actions.go_back }
+      : tier === 'MEDIUM'
+        ? { id: 'ask_someone', label: copy.actions.ask_someone }
+        : { id: 'check_another', label: copy.actions.check_another };
+  const r = copy.replies;
+  const quickReplies =
+    tier === 'HIGH'
+      ? [{ id: 'clicked', label: r.clicked }, { id: 'paid', label: r.paid }, { id: 'why', label: r.why }]
+      : tier === 'MEDIUM'
+        ? [{ id: 'why', label: r.why }, { id: 'another', label: r.another }]
+        : [{ id: 'another', label: r.another }];
+  const model = typeof body.model === 'string' ? body.model : 'unknown';
   return {
-    requestId: typeof body.requestId === 'string' ? body.requestId : 'unknown',
-    tier: v.tier as AssistantResult['tier'],
-    label: typeof v.label === 'string' ? v.label : '',
-    summary: typeof v.summary === 'string' ? v.summary : '',
-    reasons: reasons.slice(0, MAX_SENTENCES),
-    checked: stringArray(v.checked, MAX_SENTENCES),
-    notChecked: notChecked.slice(0, MAX_SENTENCES),
-    action: first && typeof first.label === 'string' ? first.label : null,
-    basis: typeof v.basis === 'string' ? v.basis : 'unknown',
+    requestId: typeof body.id === 'number' || typeof body.id === 'string' ? `msg_${body.id}` : 'unknown',
+    tier,
+    label: copy[tier as 'HIGH' | 'MEDIUM' | 'LOW'],
+    summary: reply,
+    reasons: stringArray(body.reasons, MAX_SENTENCES),
+    checked: copy.checked,
+    notChecked: copy.notChecked,
+    action: action.label,
+    actions: [action],
+    quickReplies,
+    subject: '',
+    basis: model === 'mock' ? 'rules_only' : model,
   };
 }
 
 async function askAssistant(text: string, locale: 'en' | 'ms'): Promise<AskStatus> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ASSISTANT_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), AGENT_TIMEOUT_MS);
   try {
-    const response = await fetch(`${ASSISTANT_BASE}${ASSISTANT_PATH}`, {
+    const response = await fetch(`${API_BASE}${AGENT_PATH}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ policyId: 'shou-v1', sessionId: ASSISTANT_SESSION, text: text.slice(0, 2000), locale, surface: 'extension-panel' }),
+      body: JSON.stringify({ v: 1, client: 'extension', kind: 'chat', text: text.slice(0, 8000), ts: new Date().toISOString() }),
       signal: controller.signal,
     });
     if (!response.ok) return { status: 'not_checked', reason: 'The assistant did not answer. Treat this as unverified.' };
-    const result = parseAssistant(await response.json());
+    const result = parseAgent(await response.json(), locale);
     if (!result) return { status: 'not_checked', reason: 'The assistant gave an answer I could not read.' };
     return { status: 'answered', result };
   } catch {
@@ -220,7 +252,7 @@ async function onBeforeNavigate(details: chrome.webNavigation.WebNavigationParen
   if (details.frameId !== 0) return false;
   const url = details.url;
   if (!isHttpUrl(url)) return false;
-  if (url.startsWith(API_BASE) || url.startsWith(ASSISTANT_BASE)) return false;
+  if (url.startsWith(API_BASE)) return false;
   if (warned.has(url)) return false;
 
   const analysis: Analysis = analyseUrl(url);

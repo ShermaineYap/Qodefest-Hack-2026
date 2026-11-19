@@ -2,6 +2,11 @@
 
 Newest first. Only Shermaine's agent writes here.
 
+## 2026-11-19 14:25 +08
+- Did: Rebuilt the extension side panel as a chat (D-014): conversation log, EN/BM toggle, verdict cards with "Why", one primary action, quick replies; link-free messages and "Ask Lantern Assistant to explain" now call the gateway's `/agent/message`; link checks keep `/risk/link` and now pass `localScore`. Removed the Vercel/`ASSISTANT_BASE` path. Tested the real built extension in Chrome against the gateway + enclave running locally: link → HIGH with brand evidence, message → scam card, all three messages stored in SQLite. Extension 29 tests pass; type-check and build clean.
+- Next: Fahreza sets `LLM_API_KEY` and redeploys so replies come from Qwen and BM messages are understood (mock is English keywords only); Fihkri reloads the extension.
+- Blocked on / needs from others: Fahreza: redeploy (T-042) with the model key. Fihkri: reload and smoke-test (T-043).
+
 ## 2026-11-19 14:10 +08
 - Did: Connected the extension to the Lantern Assistant (D-012): `ask` message in the service worker, side panel sends link-free messages to `/api/agent/chat` and offers "Ask Lantern Assistant to explain" after each link result, `ASSISTANT_BASE` in config, Vercel host permission, manifest renamed to Lantern. Added server-side `deny_list`, `brand_impersonation`, `credential_harvest`, `insecure_login`, `open_redirect` floors to the enclave with evidence sentences (15 pytest pass); extension 29 tests pass; build OK.
 - Next: Deploy the assistant on Vercel as `lantern-assistant` (T-041) so `ASSISTANT_BASE` resolves; Fahreza to redeploy the enclave.
